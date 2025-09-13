@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/skill-to-job-mapping.ts';
+import '@/ai/flows/ai-course-suggestion.ts';
+import '@/ai/flows/mock-interview-tool.ts';

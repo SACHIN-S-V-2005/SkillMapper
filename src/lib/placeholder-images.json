@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "quiz",
+      "description": "An abstract image representing a quiz or assessment.",
+      "imageUrl": "https://picsum.photos/seed/quiz/600/400",
+      "imageHint": "quiz assessment"
+    },
+    {
+      "id": "jobs",
+      "description": "An image of a city skyline, representing job opportunities.",
+      "imageUrl": "https://picsum.photos/seed/jobs/600/400",
+      "imageHint": "city office"
+    },
+    {
+      "id": "courses",
+      "description": "An image of books on a shelf, representing learning and courses.",
+      "imageUrl": "https://picsum.photos/seed/courses/600/400",
+      "imageHint": "books library"
+    },
+    {
+      "id": "resume",
+      "description": "A person writing at a desk, representing resume building.",
+      "imageUrl": "https://picsum.photos/seed/resume/600/400",
+      "imageHint": "writing resume"
+    },
+    {
+      "id": "interviews",
+      "description": "Two people in a professional meeting, representing an interview.",
+      "imageUrl": "https://picsum.photos/seed/interviews/600/400",
+      "imageHint": "meeting interview"
+    }
+  ]
 }
