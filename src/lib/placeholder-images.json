@@ -29,6 +29,42 @@
       "description": "Two people in a professional meeting, representing an interview.",
       "imageUrl": "https://picsum.photos/seed/interviews/600/400",
       "imageHint": "meeting interview"
+    },
+    {
+      "id": "mock-interview-resume",
+      "description": "An image representing a resume-based mock interview.",
+      "imageUrl": "https://picsum.photos/seed/mock-interview-resume/600/400",
+      "imageHint": "resume interview"
+    },
+    {
+      "id": "skill-analysis",
+      "description": "An image of a road map, representing a skill roadmap.",
+      "imageUrl": "https://picsum.photos/seed/skill-analysis/600/400",
+      "imageHint": "roadmap journey"
+    },
+    {
+      "id": "day-in-life",
+      "description": "An image of a person working at a desk, representing a day in the life.",
+      "imageUrl": "https://picsum.photos/seed/day-in-life/600/400",
+      "imageHint": "developer desk"
+    },
+    {
+      "id": "project-suggestions",
+      "description": "An image of a lightbulb, representing new ideas.",
+      "imageUrl": "https://picsum.photos/seed/project-suggestions/600/400",
+      "imageHint": "idea lightbulb"
+    },
+    {
+      "id": "resume-scanner",
+      "description": "An image of a document being scanned.",
+      "imageUrl": "https://picsum.photos/seed/resume-scanner/600/400",
+      "imageHint": "document scan"
+    },
+    {
+      "id": "interview-experience",
+      "description": "An image of people talking, representing sharing experiences.",
+      "imageUrl": "https://picsum.photos/seed/interview-experience/600/400",
+      "imageHint": "people talking"
     }
   ]
 }

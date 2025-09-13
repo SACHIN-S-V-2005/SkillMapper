@@ -4,7 +4,13 @@ import {
   BookOpen,
   FileText,
   MessageSquare,
-  ArrowRight
+  ArrowRight,
+  Search,
+  Map,
+  Sunrise,
+  Lightbulb,
+  ScanText,
+  MessageCircle
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,10 +36,10 @@ const cardItems: DashboardCardItem[] = [
     imageId: 'quiz',
   },
   {
-    title: 'Job Board',
+    title: 'Job Searching',
     description: 'Explore job postings from top companies based on your skills.',
     href: '/jobs',
-    icon: Briefcase,
+    icon: Search,
     imageId: 'jobs',
   },
   {
@@ -51,11 +57,53 @@ const cardItems: DashboardCardItem[] = [
     imageId: 'resume',
   },
   {
-    title: 'Mock Interviews',
+    title: 'Mock Interview (Skills)',
     description: 'Practice with AI-generated questions for your target job roles.',
     href: '/interviews',
     icon: MessageSquare,
     imageId: 'interviews',
+  },
+  {
+    title: 'Mock Interview (Resume)',
+    description: 'Get interview questions based on your resume.',
+    href: '/mock-interview-resume',
+    icon: MessageSquare,
+    imageId: 'mock-interview-resume',
+  },
+  {
+    title: 'Skill Analysis & Roadmap',
+    description: 'Get a roadmap to enhance your skills.',
+    href: '/skill-analysis',
+    icon: Map,
+    imageId: 'skill-analysis',
+  },
+  {
+    title: 'Day in the Life',
+    description: 'Simulate a day in the life of a professional.',
+    href: '/day-in-life',
+    icon: Sunrise,
+    imageId: 'day-in-life',
+  },
+  {
+    title: 'Project Suggestions',
+    description: 'Receive project ideas to build your portfolio.',
+    href: '/project-suggestions',
+    icon: Lightbulb,
+    imageId: 'project-suggestions',
+  },
+  {
+    title: 'Resume Scanner',
+    description: 'Scan your resume for improvements.',
+    href: '/resume-scanner',
+    icon: ScanText,
+    imageId: 'resume-scanner',
+  },
+  {
+    title: 'Interview Experience',
+    description: 'Learn from the interview experiences of others.',
+    href: '/interview-experience',
+    icon: MessageCircle,
+    imageId: 'interview-experience',
   },
 ];
 
