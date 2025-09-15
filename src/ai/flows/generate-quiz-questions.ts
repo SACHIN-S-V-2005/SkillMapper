@@ -11,26 +11,19 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const QuizQuestionSchema = z.object({
-  question: z.string().describe('The aptitude-based quiz question.'),
+  question: z.string(),
   options: z
     .array(
       z.object({
-        text: z.string().describe('The text for the answer option.'),
-        aptitude: z
-          .string()
-          .describe('The single, specific aptitude or personality trait associated with this answer (e.g., Analytical, Creative, Leader).'),
+        text: z.string(),
+        aptitude: z.string(),
       })
     )
-    .min(4)
-    .describe('An array of 4 possible answers.'),
+    .min(4),
 });
 
 const GenerateQuizQuestionsOutputSchema = z.object({
-  questions: z
-    .array(QuizQuestionSchema)
-    .min(5)
-    .max(10)
-    .describe('An array of 5 to 10 quiz questions.'),
+  questions: z.array(QuizQuestionSchema).min(5).max(10),
 });
 
 export type GenerateQuizQuestionsOutput = z.infer<
