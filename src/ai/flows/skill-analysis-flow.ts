@@ -41,7 +41,7 @@ const SkillAnalysisOutputSchema = z.object({
     z.object({
       skill: z.string().describe('The skill this resource is for.'),
       title: z.string().describe('The title of the recommended course or resource.'),
-      platform: z.string().describe('The platform offering the resource (e.g., Coursera, Udemy, Google Cloud Skills Boost, GeeksforGeeks, Javatpoint, W3Schools).'),
+      platform: z.string().describe('The platform offering the resource (e.g., GeeksforGeeks, Javatpoint, W3Schools).'),
       url: z.string().url().describe('The direct URL to the course or resource.'),
     })
   ).describe('A list of recommended online courses and certifications to learn the missing skills.')
@@ -86,8 +86,9 @@ Analyze the user's current skills and compare them against the requirements for 
     *   Provide a clear description for each step.
 
 4.  **Recommended Resources:**
-    *   For each major missing skill or group of skills in the roadmap, recommend specific online courses, tutorials, or certifications from reputable platforms (e.g., GeeksforGeeks, Javatpoint, W3Schools, Coursera, Udemy, Google Cloud Skills Boost, official documentation).
-    *   **You must provide real, valid URLs for each recommendation.**
+    *   For each major missing skill, recommend specific online tutorials or articles.
+    *   **IMPORTANT: You must ONLY suggest resources from the following websites: GeeksforGeeks, Javatpoint, or W3Schools.**
+    *   **You must provide real, valid, and working URLs for each recommendation.** Do not invent URLs.
 
 Please generate the output in a JSON object that strictly conforms to the SkillAnalysisOutputSchema.
 `,
