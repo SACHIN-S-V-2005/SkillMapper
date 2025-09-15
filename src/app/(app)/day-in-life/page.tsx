@@ -56,6 +56,20 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const fallbackTimeline: DayInLifeOutput = {
+  timeline: [
+    { time: '9:00 AM', title: 'Morning Coffee & Stand-up', description: 'Grab a coffee and join the daily team stand-up to sync on progress and blockers.', icon: 'Coffee' },
+    { time: '9:30 AM', title: 'Deep Work: Feature Development', description: 'Start coding the main feature for the current sprint. Today, it\'s building out a new API endpoint.', icon: 'Code' },
+    { time: '11:00 AM', title: 'Code Review', description: 'Review a pull request from a junior developer, providing constructive feedback.', icon: 'Users' },
+    { time: '12:00 PM', title: 'Lunch Break', description: 'Step away from the screen for a lunch break.', icon: 'Lunch' },
+    { time: '1:00 PM', title: 'Pair Programming Session', description: 'Work with another engineer to tackle a complex bug in the payment module.', icon: 'Code' },
+    { time: '2:30 PM', title: 'Planning & Documentation', description: 'Document the new API endpoint and start planning the next set of tasks.', icon: 'FileText' },
+    { time: '4:00 PM', title: 'Async Communication', description: 'Catch up on Slack messages and emails, responding to queries from other teams.', icon: 'MessageSquare' },
+    { time: '5:00 PM', title: 'Wrap-up', description: 'Push the latest code, update Jira tickets, and plan for tomorrow.', icon: 'Code' },
+  ],
+};
+
+
 export default function DayInLifePage() {
   const [timeline, setTimeline] = useState<DayInLifeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,7 +93,8 @@ export default function DayInLifePage() {
       console.error('Error generating timeline:', error);
       let description = "Failed to generate the timeline. Please try again.";
       if (error instanceof Error && (error.message.includes('429') || error.message.toLowerCase().includes('quota'))) {
-        description = "The AI service is currently busy due to high demand. Please try again in a moment.";
+        description = "⚡ Our AI is currently busy due to high demand. Displaying a sample timeline for a Software Engineer.";
+        setTimeline(fallbackTimeline);
       }
       toast({
         variant: "destructive",
