@@ -22,7 +22,6 @@ const QuizQuestionSchema = z.object({
       })
     )
     .min(4)
-    .max(4)
     .describe('An array of 4 possible answers.'),
 });
 
