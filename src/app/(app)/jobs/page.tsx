@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -32,8 +32,8 @@ export default function JobsPage() {
         <Button>Search</Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {placeholderJobs.map((job) => (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {placeholderJobs.map(job => (
           <Card key={job.id} className="flex flex-col">
             <CardHeader>
               <CardTitle>{job.title}</CardTitle>
@@ -49,12 +49,40 @@ export default function JobsPage() {
               </p>
             </CardContent>
             <CardFooter>
-              <Button asChild className="w-full" variant="secondary">
-                <Link href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.title)}&location=India`} target="_blank">
-                  Search on LinkedIn
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="grid w-full grid-cols-2 gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.title)}&location=India`}
+                    target="_blank"
+                  >
+                    LinkedIn <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                 <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`https://www.naukri.com/${job.title.toLowerCase().split(' ').join('-')}-jobs-in-india`}
+                    target="_blank"
+                  >
+                    Naukri <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                 <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`https://in.indeed.com/jobs?q=${encodeURIComponent(job.title)}&l=India`}
+                    target="_blank"
+                  >
+                    Indeed <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                 <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={`https://unstop.com/jobs/${job.title.toLowerCase().split(' ').join('-')}`}
+                    target="_blank"
+                  >
+                    Unstop <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         ))}
