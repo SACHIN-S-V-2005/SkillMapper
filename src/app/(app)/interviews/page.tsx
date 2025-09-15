@@ -25,13 +25,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Loader2, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -151,30 +146,31 @@ export default function InterviewsPage() {
           {isLoading && (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 animate-pulse rounded-md border p-4">
-                    <div className="h-5 w-full rounded bg-muted"></div>
-                </div>
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4 flex items-center space-x-4">
+                     <div className="h-8 w-8 rounded-full bg-muted"></div>
+                     <div className="h-5 w-full rounded bg-muted"></div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
 
           {questions && questions.questions.length > 0 && (
-            <Accordion type="single" collapsible className="w-full">
+            <div className="space-y-4">
               {questions.questions.map((q, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left hover:no-underline">
-                     <span className="font-medium">Question {index + 1}</span>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-base pt-2">
-                    {q}
-                  </AccordionContent>
-                </AccordionItem>
+                <Card key={index}>
+                  <CardContent className="p-4 flex items-start gap-4">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{index + 1}</div>
+                      <p className="flex-1 text-base pt-1">{q}</p>
+                  </CardContent>
+                </Card>
               ))}
-            </Accordion>
+            </div>
           )}
 
            {!isLoading && !questions && (
-             <Card className="flex items-center justify-center p-8 text-center border-dashed">
+             <Card className="flex items-center justify-center p-8 text-center border-dashed min-h-[400px]">
               <div className="space-y-2">
                   <BrainCircuit className="mx-auto h-12 w-12 text-muted-foreground" />
                   <p className="text-muted-foreground">Your interview questions will appear here.</p>
