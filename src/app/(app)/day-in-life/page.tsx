@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -76,10 +77,14 @@ export default function DayInLifePage() {
       setTimeline(result);
     } catch (error) {
       console.error('Error generating timeline:', error);
+      let description = "Failed to generate the timeline. Please try again.";
+      if (error instanceof Error && (error.message.includes('429') || error.message.toLowerCase().includes('quota'))) {
+        description = "The AI service is currently busy due to high demand. Please try again in a moment.";
+      }
       toast({
         variant: "destructive",
         title: "An error occurred.",
-        description: "Failed to generate the timeline. Please try again.",
+        description: description,
       });
     } finally {
       setIsLoading(false);
