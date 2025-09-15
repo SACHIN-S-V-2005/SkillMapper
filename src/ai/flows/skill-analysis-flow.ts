@@ -12,7 +12,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SkillAnalysisInputSchema = z.object({
-  userSkills: z.array(z.string()).describe("A list of the user's current skills, parsed from their profile or resume."),
+  resumeDataUri: z
+    .string()
+    .describe(
+      "The user's resume, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
   desiredRole: z.string().describe('The desired career role the user wants to achieve (e.g., Data Analyst, Full-Stack Developer).'),
 });
 export type SkillAnalysisInput = z.infer<typeof SkillAnalysisInputSchema>;
@@ -61,19 +65,17 @@ const skillAnalysisPrompt = ai.definePrompt({
   output: {schema: SkillAnalysisOutputSchema},
   prompt: `You are an expert AI career coach. Your task is to perform a detailed skill gap analysis for a user who wants to achieve a specific career role.
 
-Analyze the user's current skills and compare them against the requirements for their desired role.
+First, parse the provided resume to identify the user's current skills. Then, compare them against the requirements for their desired role.
 
-**User's Current Skills:**
-{{#each userSkills}}
-- {{{this}}}
-{{/each}}
+**Resume:**
+{{media url=resumeDataUri}}
 
 **Desired Career Role:** {{{desiredRole}}}
 
 **Your Analysis Must Include:**
 
 1.  **Existing Skills Analysis:**
-    *   Evaluate the provided user skills.
+    *   Evaluate the skills extracted from the resume.
     *   Categorize each skill into one of three proficiency levels: 'Beginner', 'Intermediate', or 'Advanced' based on its context and relation to other skills.
 
 2.  **Missing Skills (Gaps):**

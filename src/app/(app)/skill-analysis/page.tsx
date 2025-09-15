@@ -4,21 +4,37 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Sparkles, Map, BookOpen, ExternalLink, MinusCircle, PlusCircle } from 'lucide-react';
+import { Loader2, Sparkles, Map, BookOpen, ExternalLink, MinusCircle, PlusCircle, Upload } from 'lucide-react';
 import Link from 'next/link';
 
 import { skillAnalysis, type SkillAnalysisOutput } from '@/ai/flows/skill-analysis-flow';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_FILE_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain'
+];
+
 const formSchema = z.object({
-  userSkills: z.string().min(10, 'Please list some of your skills.'),
+  resume: z
+    .any()
+    .refine((files) => files?.length === 1, 'Resume is required.')
+    .refine(
+      (files) => files?.[0]?.size <= MAX_FILE_SIZE,
+      `Max file size is 5MB.`
+    )
+    .refine(
+      (files) => ACCEPTED_FILE_TYPES.includes(files?.[0]?.type),
+      '.pdf, .docx, and .txt files are accepted.'
+    ),
   desiredRole: z.string().min(3, 'Please enter a valid job role.'),
 });
 
@@ -27,23 +43,37 @@ type FormValues = z.infer<typeof formSchema>;
 export default function SkillAnalysisPage() {
   const [analysis, setAnalysis] = useState<SkillAnalysisOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [fileName, setFileName] = useState('');
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      userSkills: '',
+      resume: undefined,
       desiredRole: '',
     },
   });
+
+  const fileRef = form.register('resume');
+
+  const readFileAsDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
     setAnalysis(null);
     try {
-      const skillsArray = values.userSkills.split(',').map(skill => skill.trim());
+      const file = values.resume[0];
+      const resumeDataUri = await readFileAsDataURL(file);
+      
       const result = await skillAnalysis({
-        userSkills: skillsArray,
+        resumeDataUri,
         desiredRole: values.desiredRole,
       });
       setAnalysis(result);
@@ -90,16 +120,31 @@ export default function SkillAnalysisPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
-                    name="userSkills"
+                    name="resume"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Your Skills (comma-separated)</FormLabel>
+                        <FormLabel>Upload Resume</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="e.g., Python, React, SQL, Data Analysis"
-                            className="min-h-[120px]"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Button asChild variant="outline" className="w-full justify-start text-muted-foreground">
+                              <div>
+                                <Upload className="mr-2 h-4 w-4" />
+                                {fileName || "Select a file..."}
+                              </div>
+                            </Button>
+                            <input
+                             type="file"
+                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                             accept={ACCEPTED_FILE_TYPES.join(',')}
+                             {...fileRef}
+                             onChange={(e) => {
+                               if (e.target.files && e.target.files.length > 0) {
+                                  setFileName(e.target.files[0].name);
+                                  field.onChange(e.target.files);
+                               }
+                             }}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
