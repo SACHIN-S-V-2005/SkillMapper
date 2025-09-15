@@ -57,10 +57,14 @@ export default function ProjectSuggestionsPage() {
       setSuggestions(result);
     } catch (error) {
       console.error('Error fetching project suggestions:', error);
+      let description = "Failed to fetch project suggestions. Please try again.";
+      if (error instanceof Error && (error.message.includes('429') || error.message.toLowerCase().includes('quota'))) {
+        description = "The AI service is currently busy due to high demand. Please try again in a moment.";
+      }
       toast({
         variant: "destructive",
         title: "An error occurred.",
-        description: "Failed to fetch project suggestions. Please try again.",
+        description: description,
       });
     } finally {
       setIsLoading(false);
