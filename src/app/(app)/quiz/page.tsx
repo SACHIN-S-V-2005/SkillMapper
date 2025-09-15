@@ -42,7 +42,19 @@ export default function QuizPage() {
 
     try {
       const result:GenerateQuizQuestionsOutput = await generateQuizQuestions();
-      setQuizQuestions(result.questions.map(q => ({...q, options: q.options.map(opt => ({text: opt.text, skill: opt.aptitude}))})));
+      const formattedQuestions = result.questions.map((question, index) => {
+        return {
+          question,
+          options: result.options[index].map((optionText, optionIndex) => {
+            return {
+              text: optionText,
+              aptitude: result.aptitudes[index][optionIndex],
+            };
+          }),
+        };
+      });
+      // The type from the flow is slightly different from the component's type.
+      setQuizQuestions(formattedQuestions.map(q => ({...q, options: q.options.map(opt => ({text: opt.text, skill: opt.aptitude}))})));
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
       toast({
@@ -57,6 +69,7 @@ export default function QuizPage() {
 
   useEffect(() => {
     fetchQuestions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -87,7 +100,6 @@ export default function QuizPage() {
   };
 
   const progress = quizQuestions.length > 0 ? ((currentQuestion) / quizQuestions.length) * 100 : 0;
-  const finalProgress = (quizQuestions.length / quizQuestions.length) * 100;
 
   const renderContent = () => {
     if (isLoading) {
@@ -162,6 +174,18 @@ export default function QuizPage() {
     }
 
     if (quizQuestions.length > 0) {
+      const question = quizQuestions[currentQuestion];
+      if (!question) {
+        return (
+          <div className="flex flex-col items-center justify-center text-center p-8">
+            <p className="text-muted-foreground mb-4">Error loading the next question.</p>
+            <Button onClick={fetchQuestions}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Restart Quiz
+            </Button>
+          </div>
+        );
+      }
       return (
         <motion.div
           key={currentQuestion}
@@ -173,11 +197,11 @@ export default function QuizPage() {
           <div className="mb-6 space-y-4">
             <Progress value={progress} className="w-full" />
             <p className="text-lg font-medium">
-              {quizQuestions[currentQuestion].question}
+              {question.question}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {quizQuestions[currentQuestion].options.map((option) => (
+            {question.options.map((option) => (
               <Button
                 key={option.text}
                 variant="outline"
