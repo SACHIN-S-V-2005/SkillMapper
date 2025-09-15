@@ -61,10 +61,14 @@ export default function CoursesPage() {
       setRecommendations(result);
     } catch (error) {
       console.error('Error fetching course recommendations:', error);
+      let description = "Failed to fetch course recommendations. Please try again.";
+      if (error instanceof Error && (error.message.includes('503') || error.message.toLowerCase().includes('model is overloaded'))) {
+        description = "The AI service is currently busy. Please wait a moment and try again.";
+      }
       toast({
         variant: "destructive",
         title: "An error occurred.",
-        description: "Failed to fetch course recommendations. Please try again.",
+        description: description,
       });
     } finally {
       setIsLoading(false);
