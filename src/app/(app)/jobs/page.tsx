@@ -50,8 +50,8 @@ export default function JobsPage() {
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full" variant="secondary">
-                <Link href={job.url} target="_blank">
-                  View Details
+                <Link href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.title)}`} target="_blank">
+                  Search on LinkedIn
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
