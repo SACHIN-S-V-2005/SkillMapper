@@ -1,8 +1,12 @@
 'use client';
 
+import { useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 import {
   Form,
   FormControl,
@@ -85,17 +89,74 @@ export default function ResumePage() {
   });
 
   const resumeData = form.watch();
-  
-  const handlePrint = () => {
-    if(typeof window !== 'undefined'){
-      window.print();
+  const resumePreviewRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPdf = async () => {
+    const input = resumePreviewRef.current;
+    if (!input) {
+      return;
     }
-  }
+
+    try {
+      const canvas = await html2canvas(input, {
+        scale: 2, // Increase scale for better resolution
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      
+      // A4 dimensions in points: 595.28 x 841.89
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'pt',
+        format: 'a4',
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const canvasAspectRatio = canvasWidth / canvasHeight;
+      const pdfAspectRatio = pdfWidth / pdfHeight;
+
+      let finalCanvasWidth, finalCanvasHeight;
+
+      // Fit content to page width
+      finalCanvasWidth = pdfWidth;
+      finalCanvasHeight = finalCanvasWidth / canvasAspectRatio;
+      
+      // If content is longer than one page, split it
+      let heightLeft = canvasHeight;
+      let position = 0;
+      
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d');
+      pageCanvas.width = canvasWidth;
+      pageCanvas.height = (canvasWidth / pdfWidth) * pdfHeight; // Height of one PDF page in canvas pixels
+      
+      while (heightLeft > 0) {
+        const sourceY = position * pageCanvas.height;
+        pageCtx?.drawImage(canvas, 0, sourceY, canvasWidth, pageCanvas.height, 0, 0, pageCanvas.width, pageCanvas.height);
+        const pageImgData = pageCanvas.toDataURL('image/png');
+        
+        if (position > 0) {
+            pdf.addPage();
+        }
+        
+        pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, '', 'FAST');
+        heightLeft -= pageCanvas.height;
+        position++;
+      }
+
+      pdf.save(`${(resumeData.fullName || 'resume').replace(' ', '_')}.pdf`);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
 
 
   return (
     <div className="container mx-auto">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8 flex justify-between items-center print:hidden">
         <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl font-headline">
             Resume Builder
@@ -104,13 +165,13 @@ export default function ResumePage() {
             Craft your professional story.
             </p>
         </div>
-        <Button onClick={handlePrint} className="print:hidden">
+        <Button onClick={handleDownloadPdf}>
             <Download className="mr-2 h-4 w-4" />
             Download PDF
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 print:grid-cols-1">
-        <div className="print:hidden">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 print:hidden">
+        <div>
           <Form {...form}>
             <form className="space-y-8">
               {/* Personal Details */}
@@ -182,31 +243,97 @@ export default function ResumePage() {
         </div>
 
         {/* Resume Preview */}
-        <div className="bg-card p-8 shadow-lg rounded-lg border h-fit sticky top-24 print:shadow-none print:border-none print:p-0">
-          <header className="text-center mb-6">
+        <div className="lg:h-fit lg:sticky lg:top-24">
+            <div ref={resumePreviewRef} className="bg-card p-8 shadow-lg rounded-lg border">
+                <header className="text-center mb-6">
+                    <h1 className="text-3xl font-bold font-headline">{resumeData.fullName || 'Your Name'}</h1>
+                    <p className="text-sm text-muted-foreground">
+                    {resumeData.email} {resumeData.phone && `| ${resumeData.phone}`} {resumeData.address && `| ${resumeData.address}`}
+                    </p>
+                </header>
+                
+                <main>
+                    <section className="mb-6">
+                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Summary</h2>
+                    <p className="text-sm">{resumeData.summary}</p>
+                    </section>
+                    
+                    <section className="mb-6">
+                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Work Experience</h2>
+                    {resumeData.experience?.map((exp, index) => (
+                        <div key={index} className="mb-4">
+                        <div className="flex justify-between items-baseline">
+                            <h3 className="font-semibold">{exp.jobTitle}</h3>
+                            <p className="text-sm text-muted-foreground">{exp.dates}</p>
+                        </div>
+                        <div className="flex justify-between items-baseline text-sm">
+                            <p className="italic">{exp.company}</p>
+                            <p className="text-muted-foreground">{exp.location}</p>
+                        </div>
+                        <p className="text-sm mt-1 whitespace-pre-wrap">{exp.description}</p>
+                        </div>
+                    ))}
+                    </section>
+                    
+                    <section className="mb-6">
+                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Education</h2>
+                    {resumeData.education?.map((edu, index) => (
+                        <div key={index} className="mb-2">
+                        <div className="flex justify-between items-baseline">
+                            <h3 className="font-semibold">{edu.degree}</h3>
+                            <p className="text-sm text-muted-foreground">{edu.dates}</p>
+                        </div>
+                        <div className="flex justify-between items-baseline text-sm">
+                            <p className="italic">{edu.school}</p>
+                            <p className="text-muted-foreground">{edu.location}</p>
+                        </div>
+                        </div>
+                    ))}
+                    </section>
+
+                    <section className="mb-6">
+                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Skills</h2>
+                    <p className="text-sm">{resumeData.skills}</p>
+                    </section>
+
+                    {resumeData.customSections?.map((section, index) => (
+                        <section key={index} className="mb-6">
+                            <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">{section.title}</h2>
+                            <p className="text-sm whitespace-pre-wrap">{section.description}</p>
+                        </section>
+                    ))}
+                </main>
+            </div>
+        </div>
+      </div>
+      
+      {/* Hidden printable resume */}
+      <div className="hidden">
+        <div id="printable-resume" className="bg-white text-black p-8">
+             <header className="text-center mb-6">
             <h1 className="text-3xl font-bold font-headline">{resumeData.fullName || 'Your Name'}</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               {resumeData.email} {resumeData.phone && `| ${resumeData.phone}`} {resumeData.address && `| ${resumeData.address}`}
             </p>
           </header>
           
           <main>
             <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Summary</h2>
+              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Summary</h2>
               <p className="text-sm">{resumeData.summary}</p>
             </section>
             
             <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Work Experience</h2>
+              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Work Experience</h2>
               {resumeData.experience?.map((exp, index) => (
                 <div key={index} className="mb-4">
                   <div className="flex justify-between items-baseline">
                     <h3 className="font-semibold">{exp.jobTitle}</h3>
-                    <p className="text-sm text-muted-foreground">{exp.dates}</p>
+                    <p className="text-sm text-gray-500">{exp.dates}</p>
                   </div>
                   <div className="flex justify-between items-baseline text-sm">
                     <p className="italic">{exp.company}</p>
-                    <p className="text-muted-foreground">{exp.location}</p>
+                    <p className="text-gray-500">{exp.location}</p>
                   </div>
                   <p className="text-sm mt-1 whitespace-pre-wrap">{exp.description}</p>
                 </div>
@@ -214,29 +341,29 @@ export default function ResumePage() {
             </section>
             
             <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Education</h2>
+              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Education</h2>
               {resumeData.education?.map((edu, index) => (
                 <div key={index} className="mb-2">
                   <div className="flex justify-between items-baseline">
                     <h3 className="font-semibold">{edu.degree}</h3>
-                    <p className="text-sm text-muted-foreground">{edu.dates}</p>
+                    <p className="text-sm text-gray-500">{edu.dates}</p>
                   </div>
                    <div className="flex justify-between items-baseline text-sm">
                     <p className="italic">{edu.school}</p>
-                    <p className="text-muted-foreground">{edu.location}</p>
+                    <p className="text-gray-500">{edu.location}</p>
                   </div>
                 </div>
               ))}
             </section>
 
             <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Skills</h2>
+              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Skills</h2>
               <p className="text-sm">{resumeData.skills}</p>
             </section>
 
             {resumeData.customSections?.map((section, index) => (
                 <section key={index} className="mb-6">
-                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">{section.title}</h2>
+                    <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">{section.title}</h2>
                     <p className="text-sm whitespace-pre-wrap">{section.description}</p>
                 </section>
             ))}
