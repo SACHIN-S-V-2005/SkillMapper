@@ -5,7 +5,7 @@
  *
  * @remarks
  * The flow takes user profile data and career goals as input, leverages an AI model to analyze this information,
- * and recommends a list of courses from platforms like Coursera and edX.
+ * and recommends a list of courses from various online platforms.
  *
  * @exports {
  *   suggestCourses - The main function to trigger the course suggestion flow.
@@ -21,7 +21,7 @@ import {z} from 'genkit';
 const AICourseSuggestionInputSchema = z.object({
   userProfile: z.string().describe('A detailed description of the user\'s skills, experience, and educational background.'),
   careerGoals: z.string().describe('The user\'s desired career path and specific goals.'),
-  platforms: z.array(z.enum(['Coursera', 'edX', 'Udacity'])).optional().describe('Preferred learning platforms (optional). If not specified, all platforms are considered.'),
+  platforms: z.array(z.string()).optional().describe('Preferred learning platforms (optional).'),
 });
 
 export type AICourseSuggestionInput = z.infer<typeof AICourseSuggestionInputSchema>;
@@ -30,7 +30,7 @@ const AICourseSuggestionOutputSchema = z.object({
   courseRecommendations: z.array(
     z.object({
       title: z.string().describe('The title of the recommended course.'),
-      platform: z.string().describe('The platform offering the course (e.g., Coursera, edX).'),
+      platform: z.string().describe('The platform offering the course (e.g., Coursera, edX, Udemy).'),
       url: z.string().url().describe('The URL of the course.'),
       relevanceScore: z.number().min(0).max(1).describe('A score indicating the relevance of the course to the user\'s profile and goals (0-1).'),
       reasoning: z.string().describe('Explanation of why the course is a good fit for the user.')
@@ -56,7 +56,7 @@ const aiCourseSuggestionPrompt = ai.definePrompt({
   output: {schema: AICourseSuggestionOutputSchema},
   prompt: `You are an AI career counselor specializing in recommending online courses.
 
-  Analyze the following user profile and career goals, and provide a list of courses from platforms like Coursera, edX, and Udacity that would be most helpful for the user to achieve their goals.
+  Analyze the following user profile and career goals, and provide a list of courses from any reputable online learning platform that would be most helpful for the user to achieve their goals.
 
   Consider the user's existing skills and experience, and identify courses that will help them develop new skills and knowledge relevant to their desired career path.
 
@@ -64,7 +64,7 @@ const aiCourseSuggestionPrompt = ai.definePrompt({
   Career Goals: {{{careerGoals}}}
   Preferred Platforms (if any): {{#if platforms}}{{{platforms}}}{{else}}Any platform{{/if}}
 
-  Format the output as a JSON object conforming to the AICourseSuggestionOutputSchema schema, including a relevance score (0-1) and reasoning for each course recommendation.
+  Format the output as a JSON object conforming to the AICourseSuggestionOutputSchema schema, including a relevance score (0-1) and reasoning for each course recommendation. Ensure all provided URLs are valid and working.
   `,
 });
 
