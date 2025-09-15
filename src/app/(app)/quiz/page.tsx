@@ -41,7 +41,7 @@ export default function QuizPage() {
     setQuizCompleted(false);
 
     try {
-      const result = await generateQuizQuestions();
+      const result:GenerateQuizQuestionsOutput = await generateQuizQuestions();
       setQuizQuestions(result.questions.map(q => ({...q, options: q.options.map(opt => ({text: opt.text, skill: opt.aptitude}))})));
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
