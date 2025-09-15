@@ -7,12 +7,12 @@ export function Logo({ className }: { className?: string }) {
     <Link
       href="/dashboard"
       className={cn(
-        'flex items-center gap-2 text-xl font-semibold text-foreground',
+        'flex items-center gap-3 text-xl font-semibold text-foreground',
         className
       )}
     >
-      <BrainCircuit className="h-7 w-7 text-primary" />
-      <span className="font-headline">
+      <BrainCircuit className="h-8 w-8 text-primary" />
+      <span className="font-headline text-2xl">
         Skill<span className="text-primary">Mapper</span>
       </span>
     </Link>

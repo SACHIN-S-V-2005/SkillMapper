@@ -108,7 +108,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto">
       <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl font-headline">
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl font-headline">
           Welcome to SkillMapper
         </h1>
         <p className="text-lg text-muted-foreground">
@@ -119,7 +119,7 @@ export default function DashboardPage() {
         {cardItems.map((item) => {
           const image = getImage(item.imageId);
           return (
-            <Card key={item.title} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+            <Card key={item.title} className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-xl dark:hover:shadow-primary/10">
               {image && (
                  <div className="relative h-48 w-full">
                     <Image
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                  </div>
               )}
               <CardHeader>
-                <CardTitle className="flex items-center gap-3">
+                <CardTitle className="flex items-center gap-3 font-headline text-2xl">
                   <item.icon className="h-6 w-6 text-primary" />
                   <span>{item.title}</span>
                 </CardTitle>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="flex-grow" />
               <CardFooter>
-                <Button asChild className="w-full" variant="outline">
+                <Button asChild className="w-full" variant="secondary">
                   <Link href={item.href}>
                     Get Started <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
