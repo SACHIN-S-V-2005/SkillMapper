@@ -1,45 +1,45 @@
 'use server';
 /**
- * @fileOverview This file defines a Genkit flow for mapping user skills to suitable job roles.
+ * @fileOverview This file defines a Genkit flow for mapping user aptitudes to suitable job roles.
  *
- * - skillToJobMapping - A function that takes a list of skills and recommends job roles.
- * - SkillToJobMappingInput - The input type for the skillToJobMapping function.
- * - SkillToJobMappingOutput - The return type for the skillToJobMapping function.
+ * - aptitudeToJobMapping - A function that takes a list of aptitudes and recommends job roles.
+ * - AptitudeToJobMappingInput - The input type for the aptitudeToJobMapping function.
+ * - AptitudeToJobMappingOutput - The return type for the aptitudeToJobMapping function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const SkillToJobMappingInputSchema = z.object({
-  skills: z
+const AptitudeToJobMappingInputSchema = z.object({
+  aptitudes: z
     .array(z.string())
-    .describe('A list of skills possessed by the user.'),
+    .describe('A list of aptitudes or traits possessed by the user.'),
 });
-export type SkillToJobMappingInput = z.infer<typeof SkillToJobMappingInputSchema>;
+export type AptitudeToJobMappingInput = z.infer<typeof AptitudeToJobMappingInputSchema>;
 
-const SkillToJobMappingOutputSchema = z.object({
+const AptitudeToJobMappingOutputSchema = z.object({
   jobRoles: z
     .array(z.string())
-    .describe('A list of job roles suitable for the user based on their skills.'),
+    .describe('A list of job roles suitable for the user based on their aptitudes.'),
 });
-export type SkillToJobMappingOutput = z.infer<typeof SkillToJobMappingOutputSchema>;
+export type AptitudeToJobMappingOutput = z.infer<typeof AptitudeToJobMappingOutputSchema>;
 
-export async function skillToJobMapping(input: SkillToJobMappingInput): Promise<SkillToJobMappingOutput> {
-  return skillToJobMappingFlow(input);
+export async function aptitudeToJobMapping(input: AptitudeToJobMappingInput): Promise<AptitudeToJobMappingOutput> {
+  return aptitudeToJobMappingFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'skillToJobMappingPrompt',
-  input: {schema: SkillToJobMappingInputSchema},
-  output: {schema: SkillToJobMappingOutputSchema},
-  prompt: `You are a career advisor. A user has the following skills: {{{skills}}}. Recommend a list of job roles that would be suitable for them.`,
+  name: 'aptitudeToJobMappingPrompt',
+  input: {schema: AptitudeToJobMappingInputSchema},
+  output: {schema: AptitudeToJobMappingOutputSchema},
+  prompt: `You are a career advisor. A user has the following aptitudes: {{{aptitudes}}}. Recommend a list of job roles that would be suitable for them.`,
 });
 
-const skillToJobMappingFlow = ai.defineFlow(
+const aptitudeToJobMappingFlow = ai.defineFlow(
   {
-    name: 'skillToJobMappingFlow',
-    inputSchema: SkillToJobMappingInputSchema,
-    outputSchema: SkillToJobMappingOutputSchema,
+    name: 'aptitudeToJobMappingFlow',
+    inputSchema: AptitudeToJobMappingInputSchema,
+    outputSchema: AptitudeToJobMappingOutputSchema,
   },
   async input => {
     const {output} = await prompt(input);

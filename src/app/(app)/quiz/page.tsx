@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Sparkles, Wand2, RefreshCw } from 'lucide-react';
-import { skillToJobMapping } from '@/ai/flows/skill-to-job-mapping';
+import { aptitudeToJobMapping } from '@/ai/flows/aptitude-to-job-mapping';
 import { generateQuizQuestions } from '@/ai/flows/generate-quiz-questions';
 import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-questions';
 
@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function QuizPage() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userSkills, setUserSkills] = useState<string[]>([]);
+  const [userAptitudes, setUserAptitudes] = useState<string[]>([]);
   const [jobRoles, setJobRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFindingJobs, setIsFindingJobs] = useState(false);
@@ -36,13 +36,13 @@ export default function QuizPage() {
     setIsLoading(true);
     setQuizQuestions([]);
     setCurrentQuestion(0);
-    setUserSkills([]);
+    setUserAptitudes([]);
     setJobRoles([]);
     setQuizCompleted(false);
 
     try {
       const result = await generateQuizQuestions();
-      setQuizQuestions(result.questions);
+      setQuizQuestions(result.questions.map(q => ({...q, options: q.options.map(opt => ({text: opt.text, skill: opt.aptitude}))})));
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
       toast({
@@ -60,8 +60,8 @@ export default function QuizPage() {
   }, []);
 
 
-  const handleAnswer = (skill: string) => {
-    setUserSkills((prev) => [...new Set([...prev, skill])]);
+  const handleAnswer = (aptitude: string) => {
+    setUserAptitudes((prev) => [...new Set([...prev, aptitude])]);
     if (currentQuestion < quizQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -72,7 +72,7 @@ export default function QuizPage() {
   const handleFindJobs = async () => {
     setIsFindingJobs(true);
     try {
-      const result = await skillToJobMapping({ skills: userSkills });
+      const result = await aptitudeToJobMapping({ aptitudes: userAptitudes });
       setJobRoles(result.jobRoles);
     } catch (error) {
       console.error('Error fetching job roles:', error);
@@ -112,12 +112,12 @@ export default function QuizPage() {
               <Wand2 className="mx-auto h-12 w-12 text-primary" />
               <h3 className="mt-4 text-xl font-semibold">Quiz Complete!</h3>
               <p className="mt-2 text-muted-foreground">
-                Based on your answers, we've identified these skills:
+                Based on your answers, we've identified these aptitudes:
               </p>
               <div className="my-4 flex flex-wrap justify-center gap-2">
-                {userSkills.map((skill) => (
-                  <Badge key={skill} variant="secondary">
-                    {skill}
+                {userAptitudes.map((aptitude) => (
+                  <Badge key={aptitude} variant="secondary">
+                    {aptitude}
                   </Badge>
                 ))}
               </div>
@@ -209,7 +209,7 @@ export default function QuizPage() {
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Career Quiz</CardTitle>
           <CardDescription>
-            Answer a few questions to discover your skills and potential career paths.
+            Answer a few questions to discover your aptitudes and potential career paths.
           </CardDescription>
         </CardHeader>
         <CardContent className="min-h-[20rem] flex items-center justify-center">

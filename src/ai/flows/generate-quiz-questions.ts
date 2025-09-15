@@ -3,7 +3,7 @@
 /**
  * @fileOverview This file defines a Genkit flow for generating quiz questions.
  *
- * - generateQuizQuestions - A function that generates quiz questions about programming languages.
+ * - generateQuizQuestions - A function that generates aptitude-based quiz questions for career discovery.
  * - GenerateQuizQuestionsOutput - The output type for the generateQuizQuestions function.
  */
 
@@ -11,14 +11,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const QuizQuestionSchema = z.object({
-  question: z.string().describe('The quiz question.'),
+  question: z.string().describe('The aptitude-based quiz question.'),
   options: z
     .array(
       z.object({
         text: z.string().describe('The text for the answer option.'),
-        skill: z
+        aptitude: z
           .string()
-          .describe('The single, specific programming language or tech skill associated with this answer.'),
+          .describe('The single, specific aptitude or personality trait associated with this answer (e.g., Analytical, Creative, Leader).'),
       })
     )
     .min(4)
@@ -44,13 +44,13 @@ export async function generateQuizQuestions(): Promise<GenerateQuizQuestionsOutp
 const prompt = ai.definePrompt({
   name: 'generateQuizQuestionsPrompt',
   output: {schema: GenerateQuizQuestionsOutputSchema},
-  prompt: `You are an AI assistant that generates quiz questions for software developers.
-  
-  Generate 10 multiple-choice questions related to programming languages, frameworks, and technologies.
+  prompt: `You are an AI assistant that generates aptitude-based quiz questions for career discovery.
+
+  Generate 10 multiple-choice questions designed to reveal a user's natural strengths and work style preferences.
   Each question should have 4 options.
-  Each option must be associated with a single, specific skill (e.g., 'JavaScript', 'React', 'Python', 'SQL').
-  The questions should be diverse and cover different areas of software development.
-  Do not repeat skills across options within the same question.
+  Each option must be associated with a single, specific aptitude (e.g., 'Analytical', 'Creative', 'Leader', 'Detail-Oriented', 'Communicator').
+  The questions should be situational and help a user understand what kind of work environment they might thrive in.
+  Do not repeat aptitudes across options within the same question.
   Ensure the output is a JSON object that conforms to the specified schema.
   `,
 });
