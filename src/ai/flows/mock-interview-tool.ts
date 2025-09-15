@@ -32,7 +32,7 @@ const prompt = ai.definePrompt({
   name: 'generateInterviewQuestionsPrompt',
   input: {schema: GenerateInterviewQuestionsInputSchema},
   output: {schema: GenerateInterviewQuestionsOutputSchema},
-  prompt: `You are an AI interview coach. Your task is to generate foundational interview questions for a candidate based on their skills and target job role.
+  prompt: `You are an AI interview coach. Your task is to generate a comprehensive list of foundational interview questions for a candidate based on their skills and target job role.
 
 **Job Role:** {{{jobRole}}}
 
@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
 - {{{this}}}
 {{/each}}
 
-Please generate a few basic, introductory-level interview questions for each of the skills listed above. The questions should test the candidate's fundamental understanding of the topic.
+Please generate 5-7 basic, introductory-level interview questions for EACH of the skills listed above. The questions should test the candidate's fundamental understanding of the topic and be suitable for an initial screening.
 `,
 });
 
