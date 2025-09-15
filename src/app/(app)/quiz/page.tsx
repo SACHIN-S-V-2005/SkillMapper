@@ -48,13 +48,12 @@ export default function QuizPage() {
           options: result.options[index].map((optionText, optionIndex) => {
             return {
               text: optionText,
-              aptitude: result.aptitudes[index][optionIndex],
+              skill: result.aptitudes[index][optionIndex],
             };
           }),
         };
       });
-      // The type from the flow is slightly different from the component's type.
-      setQuizQuestions(formattedQuestions.map(q => ({...q, options: q.options.map(opt => ({text: opt.text, skill: opt.aptitude}))})));
+      setQuizQuestions(formattedQuestions);
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
       toast({
