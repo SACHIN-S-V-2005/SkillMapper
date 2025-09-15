@@ -87,8 +87,8 @@ Analyze the user's current skills and compare them against the requirements for 
 
 4.  **Recommended Resources:**
     *   For each major missing skill, recommend specific online tutorials or articles.
-    *   **IMPORTANT: You must ONLY suggest resources from the following websites: GeeksforGeeks, Javatpoint, or W3Schools.**
-    *   **You must provide real, valid, and working URLs for each recommendation.** Do not invent URLs.
+    *   **CRITICAL INSTRUCTION: You must ONLY suggest resources from the following websites: GeeksforGeeks, Javatpoint, or W3Schools.**
+    *   **You must provide real, valid, and working URLs. Do not invent URLs or create placeholder links. Every URL must lead to a real, accessible page.**
 
 Please generate the output in a JSON object that strictly conforms to the SkillAnalysisOutputSchema.
 `,
