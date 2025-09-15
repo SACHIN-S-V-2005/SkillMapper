@@ -218,7 +218,7 @@ export default function SkillAnalysisPage() {
                         <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
                            <div>
                                 <p className="font-semibold">{resource.title}</p>
-                                <p className="text-sm text-muted-foreground">{resource.platform} - <Badge variant="outline">{resource.skill}</Badge></p>
+                                <div className="text-sm text-muted-foreground">{resource.platform} - <Badge variant="outline">{resource.skill}</Badge></div>
                            </div>
                            <Button asChild variant="ghost" size="sm">
                                 <Link href={resource.url} target="_blank">
