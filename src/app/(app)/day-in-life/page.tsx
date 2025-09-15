@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Sparkles, Sunrise, Coffee, Code, Users, Presentation, Brainstorm, BarChart, Utensils, FileText, MessageSquare } from 'lucide-react';
+import { Loader2, Sparkles, Sunrise, Coffee, Code, Users, Presentation, Brain, BarChart, Utensils, FileText, MessageSquare } from 'lucide-react';
 import {
   generateDayInLife,
   type DayInLifeOutput,
@@ -40,7 +40,7 @@ const iconMap = {
   Code: Code,
   Users: Users,
   Presentation: Presentation,
-  Brainstorm: Brainstorm,
+  Brain: Brain,
   BarChart: BarChart,
   Lunch: Utensils,
   FileText: FileText,
