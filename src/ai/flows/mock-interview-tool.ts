@@ -41,12 +41,9 @@ const prompt = ai.definePrompt({
   - {{{this}}}
   {{/each}}
 
-  Please provide {{arrayLength userSkills}} interview questions suitable for this candidate, considering their skills and the requirements of the job.
+  Please provide {{userSkills.length}} interview questions suitable for this candidate, considering their skills and the requirements of the job.
   Ensure that the questions are diverse and cover various aspects of the job role.
   `,
-  templateHelpers: {
-    arrayLength: (array: any[]) => array.length,
-  },
 });
 
 const generateInterviewQuestionsFlow = ai.defineFlow(
