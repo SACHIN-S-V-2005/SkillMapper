@@ -41,6 +41,12 @@ const resumeSchema = z.object({
     })
   ),
   skills: z.string().min(1, 'Skills are required'),
+  customSections: z.array(
+    z.object({
+        title: z.string().min(1, 'Section title is required'),
+        description: z.string().min(1, 'Section content is required'),
+    })
+  ),
 });
 
 type ResumeFormValues = z.infer<typeof resumeSchema>;
@@ -59,6 +65,7 @@ export default function ResumePage() {
       ],
       education: [{ degree: '', school: '', location: '', dates: '' }],
       skills: '',
+      customSections: [],
     },
   });
 
@@ -70,6 +77,11 @@ export default function ResumePage() {
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({
     control: form.control,
     name: 'education',
+  });
+
+   const { fields: customFields, append: appendCustom, remove: removeCustom } = useFieldArray({
+    control: form.control,
+    name: 'customSections',
   });
 
   const resumeData = form.watch();
@@ -152,6 +164,19 @@ export default function ResumePage() {
               <div className="space-y-4 rounded-lg border p-4">
                  <FormField control={form.control} name="skills" render={({ field }) => <FormItem><FormLabel>Skills</FormLabel><FormControl><Textarea placeholder="e.g., JavaScript, React, Node.js, SQL, Project Management" {...field} /></FormControl><FormMessage /></FormItem>} />
               </div>
+
+              {/* Custom Sections */}
+               <div className="space-y-4">
+                <h3 className="text-lg font-medium">Additional Sections</h3>
+                {customFields.map((field, index) => (
+                  <div key={field.id} className="space-y-4 rounded-lg border p-4 relative">
+                    <FormField control={form.control} name={`customSections.${index}.title`} render={({ field }) => <FormItem><FormLabel>Section Title</FormLabel><FormControl><Input placeholder="e.g., Certifications" {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`customSections.${index}.description`} render={({ field }) => <FormItem><FormLabel>Content</FormLabel><FormControl><Textarea placeholder="Describe your accomplishments, projects, etc." {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeCustom(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={() => appendCustom({ title: '', description: ''})}><PlusCircle className="mr-2 h-4 w-4" /> Add Section</Button>
+              </div>
             </form>
           </Form>
         </div>
@@ -204,10 +229,17 @@ export default function ResumePage() {
               ))}
             </section>
 
-            <section>
+            <section className="mb-6">
               <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Skills</h2>
               <p className="text-sm">{resumeData.skills}</p>
             </section>
+
+            {resumeData.customSections?.map((section, index) => (
+                <section key={index} className="mb-6">
+                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">{section.title}</h2>
+                    <p className="text-sm whitespace-pre-wrap">{section.description}</p>
+                </section>
+            ))}
           </main>
         </div>
       </div>
