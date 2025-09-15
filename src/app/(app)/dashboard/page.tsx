@@ -71,8 +71,8 @@ const cardItems: DashboardCardItem[] = [
     imageId: 'mock-interview-resume',
   },
   {
-    title: 'Skill Analysis & Roadmap',
-    description: 'Get a roadmap to enhance your skills.',
+    title: 'Skill & Resume Analysis',
+    description: 'Get a roadmap to enhance your skills and improve your resume.',
     href: '/skill-analysis',
     icon: Map,
     imageId: 'skill-analysis',
@@ -90,13 +90,6 @@ const cardItems: DashboardCardItem[] = [
     href: '/project-suggestions',
     icon: Lightbulb,
     imageId: 'project-suggestions',
-  },
-  {
-    title: 'Resume Scanner',
-    description: 'Scan your resume for improvements.',
-    href: '/resume-scanner',
-    icon: ScanText,
-    imageId: 'resume-scanner',
   },
   {
     title: 'Interview Experience',

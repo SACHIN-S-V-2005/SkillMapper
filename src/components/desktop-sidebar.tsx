@@ -25,10 +25,9 @@ const navItems: NavItem[] = [
   { href: '/resume', icon: FileText, label: 'Resume Builder' },
   { href: '/interviews', icon: MessageSquare, label: 'Mock Interview (Skills)' },
   { href: '/mock-interview-resume', icon: MessageSquare, label: 'Mock Interview (Resume)' },
-  { href: '/skill-analysis', icon: Map, label: 'Skill Analysis' },
+  { href: '/skill-analysis', icon: Map, label: 'Skill & Resume Analysis' },
   { href: '/day-in-life', icon: Sunrise, label: 'Day in the Life' },
   { href: '/project-suggestions', icon: Lightbulb, label: 'Project Suggestions' },
-  { href: '/resume-scanner', icon: ScanText, label: 'Resume Scanner' },
   { href: '/interview-experience', icon: MessageCircle, label: 'Interview Experience' },
 ];
 

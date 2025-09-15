@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Sparkles, Map, BookOpen, ExternalLink, MinusCircle, PlusCircle, Upload } from 'lucide-react';
+import { Loader2, Sparkles, Map, BookOpen, ExternalLink, MinusCircle, PlusCircle, Upload, Star, Lightbulb, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
 import { skillAnalysis, type SkillAnalysisOutput } from '@/ai/flows/skill-analysis-flow';
@@ -97,15 +97,21 @@ export default function SkillAnalysisPage() {
       default: return 'outline';
     }
   };
+  
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-red-500';
+  }
 
   return (
     <div className="container mx-auto">
       <div className="mb-8 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl font-headline">
-          Skill Analysis & Roadmap
+          Skill & Resume Analysis
         </h1>
         <p className="text-lg text-muted-foreground">
-          Analyze your skills, identify gaps, and get a personalized roadmap to your dream job.
+          Get a full analysis of your resume, identify skill gaps, and get a personalized roadmap.
         </p>
       </div>
 
@@ -167,7 +173,7 @@ export default function SkillAnalysisPage() {
                     {isLoading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
                     ) : (
-                      <><Sparkles className="mr-2 h-4 w-4" />Generate Roadmap</>
+                      <><Sparkles className="mr-2 h-4 w-4" />Generate Full Analysis</>
                     )}
                   </Button>
                 </form>
@@ -179,7 +185,7 @@ export default function SkillAnalysisPage() {
         <div className="lg:col-span-2 space-y-8">
           {isLoading && (
             <div className="space-y-4">
-               {[...Array(3)].map((_, i) => (
+               {[...Array(4)].map((_, i) => (
                  <Card key={i} className="animate-pulse">
                   <CardHeader><div className="h-6 w-3/4 rounded bg-muted"></div></CardHeader>
                   <CardContent className="space-y-3">
@@ -195,12 +201,51 @@ export default function SkillAnalysisPage() {
             <>
               <Card>
                 <CardHeader>
+                  <CardTitle>Resume Analysis Report</CardTitle>
+                  <CardDescription>An AI-powered review of your resume.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="text-center">
+                        <h3 className="text-lg font-semibold">Overall Score</h3>
+                         <div className={`text-6xl font-bold ${getScoreColor(analysis.resumeAnalysis.overallScore)}`}>{analysis.resumeAnalysis.overallScore}<span className="text-2xl text-muted-foreground">/100</span></div>
+                        <p className="text-muted-foreground text-sm">Based on content, formatting, and relevance for '{form.getValues('desiredRole')}'.</p>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div>
+                          <h3 className="font-semibold flex items-center gap-2 mb-2"><Star className="h-5 w-5 text-yellow-400" /> What You're Doing Well</h3>
+                          <ul className="list-disc space-y-1 pl-5 text-muted-foreground text-sm">
+                              {analysis.resumeAnalysis.positivePoints.map((point, i) => <li key={i}>{point}</li>)}
+                          </ul>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold flex items-center gap-2 mb-2"><Lightbulb className="h-5 w-5 text-blue-500" /> Areas for Improvement</h3>
+                          <ul className="list-disc space-y-1 pl-5 text-muted-foreground text-sm">
+                              {analysis.resumeAnalysis.areasForImprovement.map((item, i) => <li key={i}><strong>{item.area}:</strong> {item.suggestion}</li>)}
+                          </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-semibold mb-2">Formatting & Contact Info</h3>
+                        <p className="text-sm text-muted-foreground"><strong className="text-foreground">Consistency:</strong> {analysis.resumeAnalysis.formattingAnalysis.consistency}</p>
+                        <p className="text-sm text-muted-foreground"><strong className="text-foreground">Readability:</strong> {analysis.resumeAnalysis.formattingAnalysis.readability}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                            <span className="flex items-center gap-1 text-sm">{analysis.resumeAnalysis.contactInfoCheck.hasEmail ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />} Email</span>
+                            <span className="flex items-center gap-1 text-sm">{analysis.resumeAnalysis.contactInfoCheck.hasPhone ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />} Phone</span>
+                            <span className="flex items-center gap-1 text-sm">{analysis.resumeAnalysis.contactInfoCheck.hasLinkedIn ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />} LinkedIn</span>
+                        </div>
+                    </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
                   <CardTitle>Your Skill Analysis</CardTitle>
-                  <CardDescription>A breakdown of your current skills and identified gaps.</CardDescription>
+                  <CardDescription>A breakdown of your skills compared to your desired role.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h3 className="font-semibold mb-2">Existing Skills</h3>
+                    <h3 className="font-semibold flex items-center gap-2 mb-2"><PlusCircle className="h-5 w-5 text-green-500" /> Your Existing Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {analysis.existingSkills.map(item => (
                         <Badge key={item.skill} variant={getBadgeVariant(item.level)}>
@@ -210,20 +255,12 @@ export default function SkillAnalysisPage() {
                     </div>
                   </div>
                    <div>
-                    <h3 className="font-semibold mb-2">Missing Skills</h3>
-                    <Accordion type="single" collapsible className="w-full">
-                      {analysis.missingSkills.map((item, index) => (
-                         <AccordionItem key={index} value={`item-${index}`}>
-                          <AccordionTrigger>
-                            <div className="flex items-center gap-2">
-                               <MinusCircle className="h-4 w-4 text-destructive" />
-                               <span className="font-medium">{item.skill}</span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>{item.reasoning}</AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
+                    <h3 className="font-semibold flex items-center gap-2 mb-2"><MinusCircle className="h-5 w-5 text-yellow-500" /> Missing Skills for Role</h3>
+                     <p className="flex flex-wrap gap-2">
+                       {analysis.resumeAnalysis.keywordAnalysis.missingKeywords.length > 0 ? analysis.resumeAnalysis.keywordAnalysis.missingKeywords.map((keyword) => (
+                        <Badge key={keyword} variant="outline">{keyword}</Badge>
+                      )) : <span className="text-sm text-muted-foreground">No critical keywords seem to be missing. Great job!</span>}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -235,13 +272,13 @@ export default function SkillAnalysisPage() {
                 </CardHeader>
                 <CardContent>
                    <div className="space-y-4">
-                     {analysis.skillRoadmap.map((step) => (
+                     {analysis.skillRoadmap.map((step, index) => (
                        <div key={step.step} className="flex gap-4">
                           <div className="flex flex-col items-center">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
                               {step.step}
                             </div>
-                            {step.step < analysis.skillRoadmap.length && <div className="w-px h-full bg-border" />}
+                            {index < analysis.skillRoadmap.length - 1 && <div className="w-px flex-1 bg-border" />}
                           </div>
                           <div>
                             <p className="font-semibold">{step.skill}</p>
@@ -280,7 +317,7 @@ export default function SkillAnalysisPage() {
               <Card className="flex items-center justify-center p-8 text-center border-dashed min-h-[400px]">
                 <div className="space-y-2">
                   <Map className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Your personalized skill analysis and roadmap will appear here.</p>
+                  <p className="text-muted-foreground">Your personalized analysis will appear here.</p>
                 </div>
               </Card>
             )
