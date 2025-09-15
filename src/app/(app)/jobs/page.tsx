@@ -68,7 +68,7 @@ export default function JobsPage() {
                 </Button>
                  <Button asChild size="sm" variant="outline">
                   <Link
-                    href={`https://www.naukri.com/${job.title.toLowerCase().split(' ').join('-')}-jobs-in-india`}
+                    href={`https://www.naukri.com/jobs-in-india?k=${encodeURIComponent(job.title)}`}
                     target="_blank"
                   >
                     Naukri <ExternalLink className="ml-2 h-4 w-4" />
@@ -84,7 +84,7 @@ export default function JobsPage() {
                 </Button>
                  <Button asChild size="sm" variant="outline">
                   <Link
-                    href={`https://unstop.com/jobs/${job.title.toLowerCase().split(' ').join('-')}`}
+                    href={`https://unstop.com/jobs?opportunity_type=jobs&searchTerm=${encodeURIComponent(job.title)}`}
                     target="_blank"
                   >
                     Unstop <ExternalLink className="ml-2 h-4 w-4" />
