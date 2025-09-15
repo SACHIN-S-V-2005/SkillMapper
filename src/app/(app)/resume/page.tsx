@@ -18,8 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Download } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { PlusCircle, Trash2, Download, Mail, Phone, Home } from 'lucide-react';
 
 const resumeSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -181,7 +180,7 @@ export default function ResumePage() {
                   <FormField control={form.control} name="fullName" render={({ field }) => <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                   <FormField control={form.control} name="email" render={({ field }) => <FormItem><FormLabel>Email</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                   <FormField control={form.control} name="phone" render={({ field }) => <FormItem><FormLabel>Phone</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
-                  <FormField control={form.control} name="address" render={({ field }) => <FormItem><FormLabel>Address</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
+                  <FormField control={form.control} name="address" render={({ field }) => <FormItem><FormLabel>Address / LinkedIn</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                 </div>
                  <FormField control={form.control} name="summary" render={({ field }) => <FormItem><FormLabel>Professional Summary</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} />
               </div>
@@ -197,7 +196,7 @@ export default function ResumePage() {
                       <FormField control={form.control} name={`experience.${index}.location`} render={({ field }) => <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>} />
                     </div>
                     <FormField control={form.control} name={`experience.${index}.dates`} render={({ field }) => <FormItem><FormLabel>Dates</FormLabel><FormControl><Input placeholder="e.g., Jan 2020 - Present" {...field} /></FormControl><FormMessage /></FormItem>} />
-                    <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} />
+                    <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => <FormItem><FormLabel>Description (use bullet points)</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>} />
                     {index > 0 && <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>}
                   </div>
                 ))}
@@ -244,44 +243,65 @@ export default function ResumePage() {
 
         {/* Resume Preview */}
         <div className="lg:h-fit lg:sticky lg:top-24">
-            <div ref={resumePreviewRef} className="bg-card p-8 shadow-lg rounded-lg border">
-                <header className="text-center mb-6">
-                    <h1 className="text-3xl font-bold font-headline">{resumeData.fullName || 'Your Name'}</h1>
-                    <p className="text-sm text-muted-foreground">
-                    {resumeData.email} {resumeData.phone && `| ${resumeData.phone}`} {resumeData.address && `| ${resumeData.address}`}
-                    </p>
+          <div ref={resumePreviewRef} className="bg-card shadow-lg rounded-lg border text-sm text-foreground overflow-hidden">
+            <div className="flex">
+              {/* Left Column (Sidebar) */}
+              <aside className="w-1/3 bg-muted/30 p-6 space-y-6">
+                 <header className="text-left">
+                    <h1 className="text-3xl font-bold font-headline text-primary">{resumeData.fullName || 'Your Name'}</h1>
                 </header>
+                <section>
+                    <h2 className="text-base font-semibold text-primary mb-2 tracking-wide uppercase">Contact</h2>
+                    <div className="space-y-2 text-xs">
+                        {resumeData.email && <p className="flex items-start gap-2"><Mail className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" /> <span>{resumeData.email}</span></p>}
+                        {resumeData.phone && <p className="flex items-start gap-2"><Phone className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" /> <span>{resumeData.phone}</span></p>}
+                        {resumeData.address && <p className="flex items-start gap-2"><Home className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" /> <span>{resumeData.address}</span></p>}
+                    </div>
+                </section>
                 
-                <main>
-                    <section className="mb-6">
-                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Summary</h2>
-                    <p className="text-sm">{resumeData.summary}</p>
+                 <section>
+                    <h2 className="text-base font-semibold text-primary mb-2 tracking-wide uppercase">Skills</h2>
+                    <p className="text-xs">{resumeData.skills}</p>
+                </section>
+
+                {resumeData.customSections?.map((section, index) => (
+                    section.title && <section key={index}>
+                        <h2 className="text-base font-semibold text-primary mb-2 tracking-wide uppercase">{section.title}</h2>
+                        <p className="text-xs whitespace-pre-wrap">{section.description}</p>
                     </section>
-                    
-                    <section className="mb-6">
-                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Work Experience</h2>
+                ))}
+              </aside>
+
+              {/* Right Column (Main Content) */}
+              <main className="w-2/3 p-6">
+                {resumeData.summary && <section className="mb-6">
+                    <p className="text-sm">{resumeData.summary}</p>
+                </section>}
+                
+                <section className="mb-6">
+                    <h2 className="text-xl font-semibold border-b-2 border-primary pb-1 mb-3 font-headline text-primary">Work Experience</h2>
                     {resumeData.experience?.map((exp, index) => (
-                        <div key={index} className="mb-4">
+                        exp.jobTitle && <div key={index} className="mb-4 last:mb-0">
                         <div className="flex justify-between items-baseline">
-                            <h3 className="font-semibold">{exp.jobTitle}</h3>
-                            <p className="text-sm text-muted-foreground">{exp.dates}</p>
+                            <h3 className="font-semibold text-base">{exp.jobTitle}</h3>
+                            <p className="text-xs text-muted-foreground">{exp.dates}</p>
                         </div>
-                        <div className="flex justify-between items-baseline text-sm">
+                        <div className="flex justify-between items-baseline text-sm mb-1">
                             <p className="italic">{exp.company}</p>
                             <p className="text-muted-foreground">{exp.location}</p>
                         </div>
-                        <p className="text-sm mt-1 whitespace-pre-wrap">{exp.description}</p>
+                        <p className="text-xs mt-1 whitespace-pre-wrap">{exp.description}</p>
                         </div>
                     ))}
-                    </section>
-                    
-                    <section className="mb-6">
-                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Education</h2>
+                </section>
+                
+                <section>
+                    <h2 className="text-xl font-semibold border-b-2 border-primary pb-1 mb-3 font-headline text-primary">Education</h2>
                     {resumeData.education?.map((edu, index) => (
-                        <div key={index} className="mb-2">
+                       edu.degree && <div key={index} className="mb-3 last:mb-0">
                         <div className="flex justify-between items-baseline">
-                            <h3 className="font-semibold">{edu.degree}</h3>
-                            <p className="text-sm text-muted-foreground">{edu.dates}</p>
+                            <h3 className="font-semibold text-base">{edu.degree}</h3>
+                            <p className="text-xs text-muted-foreground">{edu.dates}</p>
                         </div>
                         <div className="flex justify-between items-baseline text-sm">
                             <p className="italic">{edu.school}</p>
@@ -289,85 +309,10 @@ export default function ResumePage() {
                         </div>
                         </div>
                     ))}
-                    </section>
-
-                    <section className="mb-6">
-                    <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">Skills</h2>
-                    <p className="text-sm">{resumeData.skills}</p>
-                    </section>
-
-                    {resumeData.customSections?.map((section, index) => (
-                        <section key={index} className="mb-6">
-                            <h2 className="text-xl font-semibold border-b pb-1 mb-2 font-headline">{section.title}</h2>
-                            <p className="text-sm whitespace-pre-wrap">{section.description}</p>
-                        </section>
-                    ))}
-                </main>
-            </div>
-        </div>
-      </div>
-      
-      {/* Hidden printable resume */}
-      <div className="hidden">
-        <div id="printable-resume" className="bg-white text-black p-8">
-             <header className="text-center mb-6">
-            <h1 className="text-3xl font-bold font-headline">{resumeData.fullName || 'Your Name'}</h1>
-            <p className="text-sm text-gray-600">
-              {resumeData.email} {resumeData.phone && `| ${resumeData.phone}`} {resumeData.address && `| ${resumeData.address}`}
-            </p>
-          </header>
-          
-          <main>
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Summary</h2>
-              <p className="text-sm">{resumeData.summary}</p>
-            </section>
-            
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Work Experience</h2>
-              {resumeData.experience?.map((exp, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex justify-between items-baseline">
-                    <h3 className="font-semibold">{exp.jobTitle}</h3>
-                    <p className="text-sm text-gray-500">{exp.dates}</p>
-                  </div>
-                  <div className="flex justify-between items-baseline text-sm">
-                    <p className="italic">{exp.company}</p>
-                    <p className="text-gray-500">{exp.location}</p>
-                  </div>
-                  <p className="text-sm mt-1 whitespace-pre-wrap">{exp.description}</p>
-                </div>
-              ))}
-            </section>
-            
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Education</h2>
-              {resumeData.education?.map((edu, index) => (
-                <div key={index} className="mb-2">
-                  <div className="flex justify-between items-baseline">
-                    <h3 className="font-semibold">{edu.degree}</h3>
-                    <p className="text-sm text-gray-500">{edu.dates}</p>
-                  </div>
-                   <div className="flex justify-between items-baseline text-sm">
-                    <p className="italic">{edu.school}</p>
-                    <p className="text-gray-500">{edu.location}</p>
-                  </div>
-                </div>
-              ))}
-            </section>
-
-            <section className="mb-6">
-              <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">Skills</h2>
-              <p className="text-sm">{resumeData.skills}</p>
-            </section>
-
-            {resumeData.customSections?.map((section, index) => (
-                <section key={index} className="mb-6">
-                    <h2 className="text-xl font-semibold border-b border-gray-300 pb-1 mb-2 font-headline">{section.title}</h2>
-                    <p className="text-sm whitespace-pre-wrap">{section.description}</p>
                 </section>
-            ))}
-          </main>
+              </main>
+            </div>
+          </div>
         </div>
       </div>
     </div>
