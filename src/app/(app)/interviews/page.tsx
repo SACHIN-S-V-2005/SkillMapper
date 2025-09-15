@@ -25,10 +25,15 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
 import { Loader2, Sparkles, BrainCircuit } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 
 const formSchema = z.object({
@@ -38,8 +43,13 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+type InterviewQA = {
+  question: string;
+  answer: string;
+};
+
 export default function InterviewsPage() {
-  const [questions, setQuestions] = useState<GenerateInterviewQuestionsOutput | null>(null);
+  const [interviewData, setInterviewData] = useState<InterviewQA[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -53,14 +63,14 @@ export default function InterviewsPage() {
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
-    setQuestions(null);
+    setInterviewData(null);
     try {
       const skillsArray = values.userSkills.split(',').map(skill => skill.trim());
       const result = await generateInterviewQuestions({
         jobRole: values.jobRole,
         userSkills: skillsArray,
       });
-      setQuestions(result);
+      setInterviewData(result.interviews);
     } catch (error) {
       console.error('Error generating questions:', error);
        toast({
@@ -80,7 +90,7 @@ export default function InterviewsPage() {
           Mock Interview Tool
         </h1>
         <p className="text-lg text-muted-foreground">
-          Prepare for your next interview with AI-generated questions.
+          Prepare for your next interview with AI-generated questions and answers.
         </p>
       </div>
 
@@ -156,20 +166,29 @@ export default function InterviewsPage() {
             </div>
           )}
 
-          {questions && questions.questions.length > 0 && (
-            <div className="space-y-4">
-              {questions.questions.map((q, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4 flex items-start gap-4">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">{index + 1}</div>
-                      <p className="flex-1 text-base pt-1">{q}</p>
-                  </CardContent>
-                </Card>
+          {interviewData && interviewData.length > 0 && (
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              {interviewData.map((qa, index) => (
+                <AccordionItem value={`item-${index}`} key={index} className="border-b-0">
+                   <Card>
+                      <AccordionTrigger className="p-4 text-left hover:no-underline">
+                         <div className="flex items-start gap-4">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold flex-shrink-0">{index + 1}</div>
+                            <p className="flex-1 text-base pt-1">{qa.question}</p>
+                         </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="p-4 pt-0">
+                         <div className="prose prose-sm max-w-none text-muted-foreground ml-12 pl-1 border-l-2">
+                           <p className="pl-4">{qa.answer}</p>
+                         </div>
+                      </AccordionContent>
+                   </Card>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           )}
 
-           {!isLoading && !questions && (
+           {!isLoading && !interviewData && (
              <Card className="flex items-center justify-center p-8 text-center border-dashed min-h-[400px]">
               <div className="space-y-2">
                   <BrainCircuit className="mx-auto h-12 w-12 text-muted-foreground" />

@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Mock Interview Tool for generating interview questions based on targeted job roles.
+ * @fileOverview Mock Interview Tool for generating interview questions and answers based on targeted job roles.
  *
- * - generateInterviewQuestions - A function that generates interview questions.
+ * - generateInterviewQuestions - A function that generates interview questions and answers.
  * - GenerateInterviewQuestionsInput - The input type for the generateInterviewQuestions function.
  * - GenerateInterviewQuestionsOutput - The return type for the generateInterviewQuestions function.
  */
@@ -18,7 +18,10 @@ const GenerateInterviewQuestionsInputSchema = z.object({
 export type GenerateInterviewQuestionsInput = z.infer<typeof GenerateInterviewQuestionsInputSchema>;
 
 const GenerateInterviewQuestionsOutputSchema = z.object({
-  questions: z.array(z.string()).describe('An array of AI-generated interview questions tailored to the job role and user skills.'),
+  interviews: z.array(z.object({
+      question: z.string().describe('The AI-generated interview question.'),
+      answer: z.string().describe('A concise and accurate answer to the question.'),
+    })).describe('An array of AI-generated interview questions and answers tailored to the job role and user skills.'),
 });
 export type GenerateInterviewQuestionsOutput = z.infer<typeof GenerateInterviewQuestionsOutputSchema>;
 
@@ -32,7 +35,7 @@ const prompt = ai.definePrompt({
   name: 'generateInterviewQuestionsPrompt',
   input: {schema: GenerateInterviewQuestionsInputSchema},
   output: {schema: GenerateInterviewQuestionsOutputSchema},
-  prompt: `You are an AI interview coach. Your task is to generate a comprehensive list of foundational interview questions for a candidate based on their skills and target job role.
+  prompt: `You are an AI interview coach. Your task is to generate a comprehensive list of foundational interview questions, along with answers, for a candidate based on their skills and target job role.
 
 **Job Role:** {{{jobRole}}}
 
@@ -41,7 +44,7 @@ const prompt = ai.definePrompt({
 - {{{this}}}
 {{/each}}
 
-Please generate 5-7 basic, introductory-level interview questions for EACH of the skills listed above. The questions should test the candidate's fundamental understanding of the topic and be suitable for an initial screening.
+Please generate 5-7 basic, introductory-level interview questions for EACH of the skills listed above. For each question, provide a concise and correct answer. The questions should test the candidate's fundamental understanding of the topic and be suitable for an initial screening.
 `,
 });
 
