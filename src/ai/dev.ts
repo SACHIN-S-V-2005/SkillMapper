@@ -6,3 +6,4 @@ import '@/ai/flows/ai-course-suggestion.ts';
 import '@/ai/flows/mock-interview-tool.ts';
 import '@/ai/flows/generate-quiz-questions.ts';
 import '@/ai/flows/project-suggestion-flow.ts';
+import '@/ai/flows/skill-analysis-flow.ts';
