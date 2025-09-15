@@ -56,10 +56,18 @@ export default function QuizPage() {
       setQuizQuestions(formattedQuestions);
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
+      let description = 'Could not generate new questions. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('429') || error.message.toLowerCase().includes('quota')) {
+          description = 'You have exceeded the daily limit for quiz generation. Please try again tomorrow.';
+        } else if (error.message.includes('503') || error.message.toLowerCase().includes('overloaded')) {
+          description = 'The AI service is currently busy. Please wait a moment and try again.';
+        }
+      }
       toast({
         variant: 'destructive',
         title: 'Failed to load quiz',
-        description: 'Could not generate new questions. Please try again.',
+        description: description,
       });
     } finally {
       setIsLoading(false);
