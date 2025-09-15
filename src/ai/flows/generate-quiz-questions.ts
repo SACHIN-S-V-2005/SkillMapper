@@ -21,15 +21,17 @@ const QuizQuestionSchema = z.object({
           .describe('The single, specific programming language or tech skill associated with this answer.'),
       })
     )
-    .length(4)
+    .min(4)
+    .max(4)
     .describe('An array of 4 possible answers.'),
 });
 
 const GenerateQuizQuestionsOutputSchema = z.object({
   questions: z
     .array(QuizQuestionSchema)
-    .length(10)
-    .describe('An array of 10 quiz questions.'),
+    .min(5)
+    .max(10)
+    .describe('An array of 5 to 10 quiz questions.'),
 });
 
 export type GenerateQuizQuestionsOutput = z.infer<
