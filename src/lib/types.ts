@@ -16,6 +16,7 @@ export type Job = {
   id: string;
   title: string;
   company: string;
+  companyUrl: string;
   location: string;
   description: string;
   url: string;

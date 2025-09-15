@@ -9,7 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { placeholderJobs } from '@/lib/data';
-import { ExternalLink, Search } from 'lucide-react';
+import { ExternalLink, Search, Building } from 'lucide-react';
 import Link from 'next/link';
 
 export default function JobsPage() {
@@ -50,6 +50,14 @@ export default function JobsPage() {
             </CardContent>
             <CardFooter>
               <div className="grid w-full grid-cols-2 gap-2">
+                 <Button asChild size="sm" variant="outline">
+                  <Link
+                    href={job.companyUrl}
+                    target="_blank"
+                  >
+                    Company Website <Building className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
                 <Button asChild size="sm" variant="outline">
                   <Link
                     href={`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.title)}&location=India`}
