@@ -76,6 +76,10 @@ export default function ResumeScannerPage() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      targetRole: '',
+      resume: undefined,
+    },
   });
 
   const fileRef = form.register('resume');
