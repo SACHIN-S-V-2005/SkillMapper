@@ -21,8 +21,3 @@ export type Job = {
   description: string;
   url: string;
 };
-
-export type QuizQuestion = {
-  question: string;
-  options: { text: string; skill: string }[];
-};

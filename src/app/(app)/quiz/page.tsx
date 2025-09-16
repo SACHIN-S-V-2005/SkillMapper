@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Sparkles, Wand2, RefreshCw } from 'lucide-react';
-import { aptitudeToJobMapping } from '@/ai/flows/aptitude-to-job-mapping';
+import { Loader2, Sparkles, Wand2, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { generateQuizQuestions } from '@/ai/flows/generate-quiz-questions';
 import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-questions';
 
@@ -19,49 +18,80 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import type { QuizQuestion } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+
+type QuizQuestion = GenerateQuizQuestionsOutput['questions'][0];
+
+const fallbackQuestions: QuizQuestion[] = [
+    {
+      "question": "Which of the following is a key skill for a Data Analyst?",
+      "options": ["Video Editing", "SQL", "Graphic Design", "Creative Writing"],
+      "answer": "SQL"
+    },
+    {
+      "question": "What does 'UI' stand for in 'UI/UX Design'?",
+      "options": ["User Interaction", "User Interface", "Universal Integration", "User Identity"],
+      "answer": "User Interface"
+    },
+    {
+      "question": "If a project is delayed, what is the first thing a Project Manager should do?",
+      "options": ["Blame the team", "Ignore the delay", "Communicate with stakeholders", "Extend the deadline silently"],
+      "answer": "Communicate with stakeholders"
+    },
+    {
+      "question": "Which programming language is most commonly used for web frontend development?",
+      "options": ["Python", "Java", "JavaScript", "C++"],
+      "answer": "JavaScript"
+    },
+    {
+      "question": "What is the primary goal of a marketing campaign?",
+      "options": ["To win design awards", "To increase brand awareness and sales", "To hire new employees", "To develop new software"],
+      "answer": "To increase brand awareness and sales"
+    }
+];
+
 
 export default function QuizPage() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [userAptitudes, setUserAptitudes] = useState<string[]>([]);
-  const [jobRoles, setJobRoles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFindingJobs, setIsFindingJobs] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = async (useFallback = false) => {
     setIsLoading(true);
     setQuizQuestions([]);
     setCurrentQuestion(0);
-    setUserAptitudes([]);
-    setJobRoles([]);
+    setSelectedAnswer(null);
+    setScore(0);
     setQuizCompleted(false);
 
+    if (useFallback) {
+        setQuizQuestions(fallbackQuestions);
+        setIsLoading(false);
+        toast({
+            title: "Using Fallback Quiz",
+            description: "⚡ Our AI is currently busy due to high demand. Please enjoy this sample quiz.",
+        });
+        return;
+    }
+
     try {
-      const result:GenerateQuizQuestionsOutput = await generateQuizQuestions();
-      const formattedQuestions = result.questions.map((question, index) => {
-        return {
-          question,
-          options: result.options[index].map((optionText, optionIndex) => {
-            return {
-              text: optionText,
-              skill: result.aptitudes[index][optionIndex],
-            };
-          }),
-        };
-      });
-      setQuizQuestions(formattedQuestions);
+      const result = await generateQuizQuestions();
+      setQuizQuestions(result.questions);
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
-      let description = 'Could not generate new questions. Please try again.';
+      let description = 'Could not generate new questions. Using a sample quiz instead.';
       if (error instanceof Error) {
         if (error.message.includes('429') || error.message.toLowerCase().includes('quota')) {
-          description = 'You have exceeded the daily limit for quiz generation. Please try again tomorrow.';
+          description = 'You have exceeded the daily limit for quiz generation. Using a sample quiz.';
         } else if (error.message.includes('503') || error.message.toLowerCase().includes('overloaded')) {
-          description = 'The AI service is currently busy. Please wait a moment and try again.';
+          description = 'The AI service is currently busy. Using a sample quiz.';
         }
       }
       toast({
@@ -69,6 +99,7 @@ export default function QuizPage() {
         title: 'Failed to load quiz',
         description: description,
       });
+      setQuizQuestions(fallbackQuestions);
     } finally {
       setIsLoading(false);
     }
@@ -80,33 +111,26 @@ export default function QuizPage() {
   }, []);
 
 
-  const handleAnswer = (aptitude: string) => {
-    setUserAptitudes((prev) => [...new Set([...prev, aptitude])]);
-    if (currentQuestion < quizQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setQuizCompleted(true);
+  const handleAnswer = (answer: string) => {
+    if (selectedAnswer) return; // Prevent changing answer
+
+    setSelectedAnswer(answer);
+    if (answer === quizQuestions[currentQuestion].answer) {
+      setScore(score + 1);
     }
+
+    setTimeout(() => {
+        if (currentQuestion < quizQuestions.length - 1) {
+            setCurrentQuestion(currentQuestion + 1);
+            setSelectedAnswer(null);
+        } else {
+            setQuizCompleted(true);
+        }
+    }, 1500); // Wait 1.5 seconds before moving to next question
   };
 
-  const handleFindJobs = async () => {
-    setIsFindingJobs(true);
-    try {
-      const result = await aptitudeToJobMapping({ aptitudes: userAptitudes });
-      setJobRoles(result.jobRoles);
-    } catch (error) {
-      console.error('Error fetching job roles:', error);
-      toast({
-        variant: 'destructive',
-        title: 'An error occurred',
-        description: 'Failed to find job roles. Please try again.',
-      });
-    } finally {
-      setIsFindingJobs(false);
-    }
-  };
 
-  const progress = quizQuestions.length > 0 ? ((currentQuestion) / quizQuestions.length) * 100 : 0;
+  const progress = quizQuestions.length > 0 ? ((currentQuestion + 1) / quizQuestions.length) * 100 : 0;
 
   const renderContent = () => {
     if (isLoading) {
@@ -126,56 +150,19 @@ export default function QuizPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {jobRoles.length === 0 ? (
             <div className="text-center">
               <Wand2 className="mx-auto h-12 w-12 text-primary" />
               <h3 className="mt-4 text-xl font-semibold">Quiz Complete!</h3>
               <p className="mt-2 text-muted-foreground">
-                Based on your answers, we've identified these aptitudes:
+                You scored {score} out of {quizQuestions.length}.
               </p>
-              <div className="my-4 flex flex-wrap justify-center gap-2">
-                {userAptitudes.map((aptitude) => (
-                  <Badge key={aptitude} variant="secondary">
-                    {aptitude}
-                  </Badge>
-                ))}
-              </div>
-              <Button onClick={handleFindJobs} disabled={isFindingJobs}>
-                {isFindingJobs ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Finding Job Roles...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Let AI Find Job Roles for You
-                  </>
-                )}
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <h3 className="mb-4 text-center text-xl font-semibold">
-                Recommended Job Roles
-              </h3>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {jobRoles.map((role) => (
-                  <Card key={role}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">{role}</CardTitle>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
                <div className="mt-6 text-center">
-                  <Button variant="outline" onClick={fetchQuestions}>
+                  <Button variant="outline" onClick={() => fetchQuestions()}>
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Take Another Quiz
                   </Button>
               </div>
             </div>
-          )}
         </motion.div>
       )
     }
@@ -186,7 +173,7 @@ export default function QuizPage() {
         return (
           <div className="flex flex-col items-center justify-center text-center p-8">
             <p className="text-muted-foreground mb-4">Error loading the next question.</p>
-            <Button onClick={fetchQuestions}>
+            <Button onClick={() => fetchQuestions()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Restart Quiz
             </Button>
@@ -200,24 +187,38 @@ export default function QuizPage() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
           transition={{ duration: 0.3 }}
+          className="w-full"
         >
           <div className="mb-6 space-y-4">
             <Progress value={progress} className="w-full" />
-            <p className="text-lg font-medium">
+            <p className="text-lg font-medium text-center">
               {question.question}
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {question.options.map((option) => (
-              <Button
-                key={option.text}
-                variant="outline"
-                className="h-auto min-h-[4rem] justify-start whitespace-normal text-left"
-                onClick={() => handleAnswer(option.skill)}
-              >
-                {option.text}
-              </Button>
-            ))}
+            {question.options.map((option) => {
+                const isSelected = selectedAnswer === option;
+                const isCorrect = question.answer === option;
+
+                return (
+                  <Button
+                    key={option}
+                    variant="outline"
+                    className={cn(
+                        "h-auto min-h-[4rem] justify-start whitespace-normal text-left transition-all duration-300",
+                        selectedAnswer && isCorrect && "bg-green-100 border-green-300 text-green-800 hover:bg-green-100",
+                        selectedAnswer && !isCorrect && isSelected && "bg-red-100 border-red-300 text-red-800 hover:bg-red-100"
+                    )}
+                    onClick={() => handleAnswer(option)}
+                    disabled={!!selectedAnswer}
+                  >
+                    <div className="flex-1">{option}</div>
+                    {selectedAnswer && isCorrect && isSelected && <CheckCircle className="h-5 w-5 text-green-600" />}
+                    {selectedAnswer && !isCorrect && isSelected && <XCircle className="h-5 w-5 text-red-600" />}
+                    {selectedAnswer && isCorrect && !isSelected && <CheckCircle className="h-5 w-5 text-green-600 opacity-50" />}
+                  </Button>
+                )
+            })}
           </div>
         </motion.div>
       )
@@ -226,7 +227,7 @@ export default function QuizPage() {
     return (
        <div className="flex flex-col items-center justify-center text-center p-8">
             <p className="text-muted-foreground mb-4">Could not load quiz questions.</p>
-            <Button onClick={fetchQuestions}>
+            <Button onClick={() => fetchQuestions()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Try Again
             </Button>
@@ -240,7 +241,7 @@ export default function QuizPage() {
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Career Quiz</CardTitle>
           <CardDescription>
-            Answer a few questions to discover your aptitudes and potential career paths.
+            Test your knowledge and find out where you stand.
           </CardDescription>
         </CardHeader>
         <CardContent className="min-h-[20rem] flex items-center justify-center">
