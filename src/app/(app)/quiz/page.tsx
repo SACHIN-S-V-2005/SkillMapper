@@ -63,7 +63,7 @@ export default function QuizPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchQuestions = async (useFallback = false) => {
+  const fetchQuestions = async () => {
     setIsLoading(true);
     setQuizQuestions([]);
     setCurrentQuestion(0);
@@ -71,33 +71,14 @@ export default function QuizPage() {
     setScore(0);
     setQuizCompleted(false);
 
-    if (useFallback) {
-        setQuizQuestions(fallbackQuestions);
-        setIsLoading(false);
-        toast({
-            title: "Using Fallback Quiz",
-            description: "⚡ Our AI is currently busy due to high demand. Please enjoy this sample quiz.",
-        });
-        return;
-    }
-
     try {
       const result = await generateQuizQuestions();
       setQuizQuestions(result.questions);
     } catch (error) {
       console.error('Error fetching quiz questions:', error);
-      let description = 'Could not generate new questions. Using a sample quiz instead.';
-      if (error instanceof Error) {
-        if (error.message.includes('429') || error.message.toLowerCase().includes('quota')) {
-          description = 'You have exceeded the daily limit for quiz generation. Using a sample quiz.';
-        } else if (error.message.includes('503') || error.message.toLowerCase().includes('overloaded')) {
-          description = 'The AI service is currently busy. Using a sample quiz.';
-        }
-      }
       toast({
-        variant: 'destructive',
-        title: 'Failed to load quiz',
-        description: description,
+        title: "Using Fallback Quiz",
+        description: "⚡ Our AI is currently busy due to high demand. Please enjoy this sample quiz.",
       });
       setQuizQuestions(fallbackQuestions);
     } finally {
