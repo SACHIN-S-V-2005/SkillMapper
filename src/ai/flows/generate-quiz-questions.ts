@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -34,17 +35,23 @@ export async function generateQuizQuestions(): Promise<GenerateQuizQuestionsOutp
 const prompt = ai.definePrompt({
   name: 'generateQuizQuestionsPrompt',
   output: {schema: GenerateQuizQuestionsOutputSchema},
-  prompt: `You are an AI assistant that generates multiple-choice quiz questions for students preparing for careers.
+  prompt: `You are an AI assistant generating aptitude and logical reasoning quiz questions for a Career Quiz app.
 
-  Your task is to generate at least 5 questions that test a mix of aptitude, logical reasoning, general career awareness, and basic technical skills.
+Your task is to auto-generate multiple-choice questions that test a mix of the following categories:
+- Quantitative aptitude (e.g., numbers, percentages, ratios, averages, time & work, probability)
+- Logical reasoning (e.g., puzzles, series, coding-decoding, seating arrangements, syllogisms)
+- Verbal aptitude (e.g., analogies, synonyms, comprehension, error spotting)
+- General aptitude (e.g., problem-solving, analytical thinking)
 
-  - The questions should have mixed difficulty levels (easy, medium, hard).
-  - The questions should be short and simple for mobile app display.
-  - Options should be clear and not repetitive.
+**Rules:**
+- Generate at least 5 questions per request.
+- Ensure a variety of question types from the categories above.
+- The difficulty should be balanced (easy, medium, hard).
+- Keep language simple and options clear for mobile display.
+- Do not repeat previous questions in the same session.
 
-  Format the output strictly as a JSON object conforming to the GenerateQuizQuestionsOutputSchema.
-  For each question, provide the question text, an array of 4 options, and the string of the correct answer.
-  `,
+Format the output strictly as a JSON object conforming to the GenerateQuizQuestionsOutputSchema.
+`,
 });
 
 const generateQuizQuestionsFlow = ai.defineFlow(
