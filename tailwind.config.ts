@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
+        body: ['var(--font-poppins)', 'sans-serif'],
         headline: ['Georgia', 'serif'],
         code: ['monospace'],
       },
@@ -67,6 +67,7 @@ export default {
         },
       },
       borderRadius: {
+        '2xl': 'calc(var(--radius) * 2)',
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',

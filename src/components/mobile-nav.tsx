@@ -34,14 +34,14 @@ const navItems: NavItem[] = [
 export function MobileNav() {
   return (
     <div className="flex h-full flex-col p-6">
-      <div className="mb-8">
+      <div className="mb-10">
         <Logo />
       </div>
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-3">
         {navItems.map((item) => (
           <NavLink key={item.href} href={item.href}>
-            <item.icon className="h-5 w-5" />
-            {item.label}
+            <item.icon className="h-6 w-6" />
+            <span className="text-base">{item.label}</span>
           </NavLink>
         ))}
       </nav>

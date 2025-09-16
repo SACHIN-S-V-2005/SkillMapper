@@ -33,15 +33,15 @@ const navItems: NavItem[] = [
 
 export function DesktopSidebar() {
   return (
-    <aside className="hidden w-64 flex-shrink-0 flex-col border-r bg-card p-6 md:flex">
-      <div className="mb-8">
+    <aside className="hidden w-72 flex-shrink-0 flex-col border-r bg-card p-6 md:flex">
+      <div className="mb-10">
         <Logo />
       </div>
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-3">
         {navItems.map((item) => (
           <NavLink key={item.href} href={item.href}>
-            <item.icon className="h-5 w-5" />
-            {item.label}
+            <item.icon className="h-6 w-6" />
+            <span className="text-base">{item.label}</span>
           </NavLink>
         ))}
       </nav>
