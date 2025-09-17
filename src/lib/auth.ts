@@ -5,13 +5,13 @@ import {
   signInWithEmailAndPassword,
   signOut,
   type User,
-} from 'firebase/auth/lite';
+} from 'firebase/auth';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { initializeApp, getApp, getApps, type FirebaseOptions } from 'firebase/app';
 import { getAuth as getAdminAuth, type DecodedIdToken } from 'firebase-admin/auth';
-import { initializeApp as initializeAdminApp, getApps as getAdminApps, credential, ServiceAccount } from 'firebase-admin/app';
+import { initializeApp as initializeAdminApp, getApps as getAdminApps, cert, type ServiceAccount } from 'firebase-admin/app';
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -33,20 +33,26 @@ const serviceAccount: ServiceAccount = {
     privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 }
 
-const adminApp = !getAdminApps().length ? initializeAdminApp({
-    credential: credential.cert(serviceAccount)
-}) : getAdminApps()[0]!;
+function getAdminApp() {
+    if (getAdminApps().length > 0) {
+        return getAdminApps()[0]!;
+    }
+    return initializeAdminApp({
+        credential: cert(serviceAccount)
+    });
+}
 
-const adminAuth = getAdminAuth(adminApp);
+function getAdminAuthInstance() {
+    return getAdminAuth(getAdminApp());
+}
 
-
-const SESSION_COOKIE_NAME = 'session';
+const SESSION_COOKIE_NAME = '__session';
 
 async function getSession(): Promise<DecodedIdToken | null> {
   const session = cookies().get(SESSION_COOKIE_NAME)?.value;
   if (!session) return null;
   try {
-    return await adminAuth.verifySessionCookie(session, true);
+    return await getAdminAuthInstance().verifySessionCookie(session, true);
   } catch (error) {
     console.error('Error verifying session cookie in getSession:', error);
     return null;
@@ -58,10 +64,9 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   if (!sessionCookie) return false;
 
   try {
-    const decodedIdToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+    const decodedIdToken = await getAdminAuthInstance().verifySessionCookie(sessionCookie, true);
     return !!decodedIdToken;
   } catch (error) {
-    // Session cookie is invalid.
     return false;
   }
 }
@@ -69,12 +74,14 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
 async function createSession(user: User) {
   const idToken = await user.getIdToken();
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-  const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+  const sessionCookie = await getAdminAuthInstance().createSessionCookie(idToken, { expiresIn });
 
   cookies().set(SESSION_COOKIE_NAME, sessionCookie, {
     maxAge: expiresIn,
     httpOnly: true,
     secure: true,
+    sameSite: 'lax',
+    path: '/',
   });
 }
 
@@ -94,4 +101,5 @@ export const auth = {
   isAuthenticated,
   createSession,
   signOutAndClearSession,
+  SESSION_COOKIE_NAME
 };

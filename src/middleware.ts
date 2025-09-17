@@ -2,9 +2,25 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {auth} from '@/lib/auth';
 
+async function isAuthenticated(request: NextRequest): Promise<boolean> {
+  const sessionCookie = request.cookies.get(auth.SESSION_COOKIE_NAME)?.value;
+  if (!sessionCookie) {
+    return false;
+  }
+
+  const response = await fetch(`${request.nextUrl.origin}/api/auth/verify`, {
+    headers: {
+      Cookie: `${auth.SESSION_COOKIE_NAME}=${sessionCookie}`,
+    },
+  });
+
+  return response.ok;
+}
+
+
 export async function middleware(request: NextRequest) {
   const {pathname} = request.nextUrl;
-  const authenticated = await auth.isAuthenticated(request);
+  const authenticated = await isAuthenticated(request);
 
   const isAuthRoute = pathname.startsWith('/auth');
 
