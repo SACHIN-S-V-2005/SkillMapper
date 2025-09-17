@@ -13,28 +13,10 @@ import { Button } from '@/components/ui/button';
 import { CircleUser, Menu } from 'lucide-react';
 import { MobileNav } from './mobile-nav';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/auth';
-
-
-async function handleLogout() {
-    await fetch('/api/auth/session', {
-        method: 'DELETE'
-    });
-}
 
 
 export function Header() {
   const router = useRouter();
-
-  const onLogout = async () => {
-    try {
-      await auth.signOut();
-      await handleLogout();
-      router.push('/auth/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
@@ -60,10 +42,10 @@ export function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push('/support')}>Support</DropdownMenuItem>
+            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
+            <DropdownMenuItem>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
