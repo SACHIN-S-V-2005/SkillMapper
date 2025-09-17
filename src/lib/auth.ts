@@ -5,7 +5,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   type User,
-} from 'firebase/auth';
+} from 'firebase/auth/lite';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -30,7 +30,7 @@ const clientAuth = getAuth(clientApp);
 const serviceAccount: ServiceAccount = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 }
 
 const adminApp = !getAdminApps().length ? initializeAdminApp({

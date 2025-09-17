@@ -1,6 +1,6 @@
 
 import {initializeApp, getApps, getApp, type FirebaseOptions} from 'firebase/app';
-import {getAuth} from 'firebase/auth';
+import {getAuth} from 'firebase/auth/lite';
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
