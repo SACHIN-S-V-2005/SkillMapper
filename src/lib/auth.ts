@@ -6,12 +6,9 @@ import {
   signOut,
   type User,
 } from 'firebase/auth';
-import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
 
 import { initializeApp, getApp, getApps, type FirebaseOptions } from 'firebase/app';
-import { getAuth as getAdminAuth, type DecodedIdToken } from 'firebase-admin/auth';
-import { initializeApp as initializeAdminApp, getApps as getAdminApps, cert, type ServiceAccount } from 'firebase-admin/app';
+
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -25,69 +22,7 @@ const firebaseConfig: FirebaseOptions = {
 const clientApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const clientAuth = getAuth(clientApp);
 
-
-// Admin-side auth
-const serviceAccount: ServiceAccount = {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-}
-
-function getAdminApp() {
-    if (getAdminApps().length > 0) {
-        return getAdminApps()[0]!;
-    }
-    return initializeAdminApp({
-        credential: cert(serviceAccount)
-    });
-}
-
-function getAdminAuthInstance() {
-    return getAdminAuth(getAdminApp());
-}
-
-const SESSION_COOKIE_NAME = '__session';
-
-async function getSession(): Promise<DecodedIdToken | null> {
-  const session = cookies().get(SESSION_COOKIE_NAME)?.value;
-  if (!session) return null;
-  try {
-    return await getAdminAuthInstance().verifySessionCookie(session, true);
-  } catch (error) {
-    console.error('Error verifying session cookie in getSession:', error);
-    return null;
-  }
-}
-
-async function isAuthenticated(request: NextRequest): Promise<boolean> {
-  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) return false;
-
-  try {
-    const decodedIdToken = await getAdminAuthInstance().verifySessionCookie(sessionCookie, true);
-    return !!decodedIdToken;
-  } catch (error) {
-    return false;
-  }
-}
-
-async function createSession(user: User) {
-  const idToken = await user.getIdToken();
-  const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-  const sessionCookie = await getAdminAuthInstance().createSessionCookie(idToken, { expiresIn });
-
-  cookies().set(SESSION_COOKIE_NAME, sessionCookie, {
-    maxAge: expiresIn,
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-  });
-}
-
-async function signOutAndClearSession() {
-  cookies().delete(SESSION_COOKIE_NAME);
-}
+export const SESSION_COOKIE_NAME = '__session';
 
 export const auth = {
   // Client-side methods
@@ -95,11 +30,4 @@ export const auth = {
   createUserWithEmailAndPassword: (email: string, password: string) => createUserWithEmailAndPassword(clientAuth, email, password),
   signInWithEmailAndPassword: (email: string, password: string) => signInWithEmailAndPassword(clientAuth, email, password),
   signOut: () => signOut(clientAuth),
-  
-  // Server-side methods
-  getSession,
-  isAuthenticated,
-  createSession,
-  signOutAndClearSession,
-  SESSION_COOKIE_NAME
 };

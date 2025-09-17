@@ -1,16 +1,17 @@
 
 import {NextRequest, NextResponse} from 'next/server';
-import {auth} from '@/lib/auth';
+
+const SESSION_COOKIE_NAME = '__session';
 
 async function isAuthenticated(request: NextRequest): Promise<boolean> {
-  const sessionCookie = request.cookies.get(auth.SESSION_COOKIE_NAME)?.value;
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionCookie) {
     return false;
   }
 
   const response = await fetch(`${request.nextUrl.origin}/api/auth/verify`, {
     headers: {
-      Cookie: `${auth.SESSION_COOKIE_NAME}=${sessionCookie}`,
+      Cookie: `${SESSION_COOKIE_NAME}=${sessionCookie}`,
     },
   });
 
