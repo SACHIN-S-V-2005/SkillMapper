@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/auth';
+import { UserCredential } from 'firebase/auth';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -36,6 +37,17 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+async function handleLogin(userCredential: UserCredential) {
+    const response = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ user: userCredential.user })
+    });
+    return response.ok;
+}
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +65,14 @@ export default function LoginPage() {
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
     try {
-      await auth.signInWithEmailAndPassword(values.email, values.password);
+      const userCredential = await auth.signInWithEmailAndPassword(values.email, values.password);
+      
+      const sessionCreated = await handleLogin(userCredential);
+
+      if (!sessionCreated) {
+        throw new Error('Failed to create a session.');
+      }
+
       toast({
         title: 'Login successful!',
         description: "You're now logged in.",

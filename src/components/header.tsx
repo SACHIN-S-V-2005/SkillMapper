@@ -16,12 +16,20 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
 
 
+async function handleLogout() {
+    await fetch('/api/auth/session', {
+        method: 'DELETE'
+    });
+}
+
+
 export function Header() {
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const onLogout = async () => {
     try {
       await auth.signOut();
+      await handleLogout();
       router.push('/auth/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -55,7 +63,7 @@ export function Header() {
             <DropdownMenuItem onClick={() => router.push('/settings')}>Settings</DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/support')}>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
