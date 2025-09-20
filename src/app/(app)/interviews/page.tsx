@@ -61,14 +61,6 @@ export default function InterviewsPage() {
     setIsClient(true);
   }, []);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      jobRole: 'Frontend Developer',
-      userSkills: 'React, TypeScript, Next.js',
-    },
-  });
-
   const currentQuestion = interviewData?.[currentQuestionIndex];
 
   useEffect(() => {
@@ -76,7 +68,7 @@ export default function InterviewsPage() {
       handleGetFeedback();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isListening]);
+  }, [isListening, transcript, currentQuestion]);
 
 
   async function onSubmit(values: FormValues) {
@@ -274,7 +266,7 @@ export default function InterviewsPage() {
                 <Card className="min-h-[200px]">
                      <CardHeader>
                         <CardTitle>Your Answer</CardTitle>
-                        <CardDescription>Click the button below and start speaking.</CardDescription>
+                        <CardDescription>Click the button below and start speaking. Click again to stop.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-center mb-4">
