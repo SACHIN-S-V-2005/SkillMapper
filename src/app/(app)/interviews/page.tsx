@@ -52,9 +52,14 @@ export default function InterviewsPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackOutput | null>(null);
   const [isGettingFeedback, setIsGettingFeedback] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   const { toast } = useToast();
   const { transcript, isListening, hasRecognitionSupport, startListening, stopListening, resetTranscript } = useSpeechRecognition();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -142,6 +147,14 @@ export default function InterviewsPage() {
     setFeedback(null);
     resetTranscript();
   };
+
+  if (!isClient) {
+    return (
+        <div className="container mx-auto flex items-center justify-center h-full">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+    );
+  }
 
   if (!hasRecognitionSupport) {
       return (
