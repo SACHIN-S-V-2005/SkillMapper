@@ -64,7 +64,7 @@ export const useSpeechRecognition = () => {
   useEffect(() => {
     if (!recognition) return;
 
-    recognition.onresult = (event: any) => {
+    const handleResult = (event: any) => {
       let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
@@ -74,7 +74,7 @@ export const useSpeechRecognition = () => {
       setTranscript(prev => prev + finalTranscript);
     };
 
-    recognition.onerror = (event: any) => {
+    const handleError = (event: any) => {
       console.error('Speech recognition error', event.error);
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         // Handle microphone permission issues gracefully if needed
@@ -82,14 +82,21 @@ export const useSpeechRecognition = () => {
       setIsListening(false);
     };
 
-    recognition.onend = () => {
+    const handleEnd = () => {
       setIsListening(false);
     };
+
+    recognition.onresult = handleResult;
+    recognition.onerror = handleError;
+    recognition.onend = handleEnd;
     
     // Clean up on unmount
     return () => {
         if(recognition) {
             recognition.stop();
+            recognition.onresult = null;
+            recognition.onerror = null;
+            recognition.onend = null;
         }
     };
 
