@@ -27,6 +27,8 @@ declare global {
 }
 
 let recognition: SpeechRecognition | null = null;
+// Keep track of the final transcript separately
+let finalTranscriptSinceLastStart = '';
 
 if (typeof window !== 'undefined') {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -44,9 +46,16 @@ export const useSpeechRecognition = () => {
 
   const startListening = useCallback(() => {
     if (recognition && !isListening) {
+      finalTranscriptSinceLastStart = ''; // Reset final transcript on start
       setTranscript('');
-      recognition.start();
-      setIsListening(true);
+      try {
+        recognition.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error("Speech recognition couldn't be started.", error);
+        // This can happen if start() is called too close to a previous stop().
+        setIsListening(false);
+      }
     }
   }, [isListening]);
 
@@ -58,6 +67,7 @@ export const useSpeechRecognition = () => {
   }, [isListening]);
   
   const resetTranscript = useCallback(() => {
+    finalTranscriptSinceLastStart = '';
     setTranscript('');
   }, []);
 
@@ -65,13 +75,15 @@ export const useSpeechRecognition = () => {
     if (!recognition) return;
 
     const handleResult = (event: any) => {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+       let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalTranscriptSinceLastStart += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
         }
-      }
-      setTranscript(prev => prev + finalTranscript);
+        setTranscript(finalTranscriptSinceLastStart + interimTranscript);
     };
 
     const handleError = (event: any) => {
