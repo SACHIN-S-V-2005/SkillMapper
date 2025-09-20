@@ -56,6 +56,14 @@ export default function InterviewsPage() {
 
   const { toast } = useToast();
   const { transcript, isListening, hasRecognitionSupport, startListening, stopListening, resetTranscript } = useSpeechRecognition();
+  
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      jobRole: '',
+      userSkills: '',
+    },
+  });
 
   useEffect(() => {
     setIsClient(true);
@@ -68,7 +76,7 @@ export default function InterviewsPage() {
       handleGetFeedback();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isListening, transcript, currentQuestion]);
+  }, [isListening]);
 
 
   async function onSubmit(values: FormValues) {
@@ -138,6 +146,7 @@ export default function InterviewsPage() {
     setCurrentQuestionIndex(0);
     setFeedback(null);
     resetTranscript();
+    form.reset();
   };
 
   if (!isClient) {
@@ -168,7 +177,7 @@ export default function InterviewsPage() {
           Live Mock Interview
         </h1>
         <p className="text-lg text-muted-foreground">
-          Practice your interview skills with a live AI interviewer.
+          Practice your interview skills with a live AI interviewer. Speak your answer and get instant feedback.
         </p>
       </div>
 
